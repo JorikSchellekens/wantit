@@ -207,6 +207,7 @@ export const POOL_ABI = [
 export const LOADING_EVENT: Event = {
   title: "Loading",
   description: "Loading",
+  successCriteria: "Loading",
   poolBalances: {},
   payouts: [],
   resolutionStrategy: { type: "coordinator", coordinator: {address: "Loading"} }

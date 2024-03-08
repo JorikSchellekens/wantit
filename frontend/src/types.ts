@@ -22,6 +22,7 @@ export type DAOResolutionStrategy = { type: "DAO"; DAO: Identity };
 export interface Event {
     title: string;
     description: string;
+    successCriteria: string;
     expiery?: number;
     payouts: { identity: Identity, proportion: number }[];
     poolBalances: ERC20Balances;

@@ -182,6 +182,18 @@ function EventPool({ contractAddress }: PoolProps) {
         event.poolBalances[GOERLI_TOKENS.STRK] = strkBalance;
     }
 
+    // Get the event pool success criteria
+    const { data: successCriteriaData } = useContractRead({
+        functionName: "success_criteria",
+        address: contractAddress,
+        abi: POOL_ABI,
+        watch: true,
+    })
+    if (successCriteriaData !== undefined) {
+        // @ts-expect-error we know the data format
+        event.successCriteria = stringFromByteArray(successCriteriaData);
+    }
+
     const { contract: ethContract } = useContract({abi: ERC20_ABI, address: GOERLI_TOKENS.ETH});
     const { contract: strkContract } = useContract({abi: ERC20_ABI, address: GOERLI_TOKENS.STRK});
 
@@ -254,6 +266,7 @@ function EventPool({ contractAddress }: PoolProps) {
             <Dialog title={event.title} buttonTitle="Believe">
                 <Stack direction="column" spacing={2} justifyContent="space-between" alignItems="left" className="px-4 py-2">
                     <Box sx={{ fontSize: '16px', color: '#666' }}>{event.description}</Box>
+                    <Box sx={{ fontSize: '16px', color: '#666' }}>{event.successCriteria}</Box>
                     <Typography>Pool Contract: <VoyagerLink identity={{address: contractAddress}} type={LinkType.Identity}/></Typography>
                     <Divider />
                     <Typography level="h4">Total Pool</Typography>
