@@ -3,8 +3,6 @@ use starknet::Felt252TryIntoContractAddress;
 
 #[starknet::interface]
 trait IWantIt<TContractState> {
-    fn lfgoooo(ref self: TContractState, token_address: ContractAddress, amount: u256);
-    // TODO: implement a lfgoooo_from.
     fn payout(ref self: TContractState, token_addresses: Array<ContractAddress>);
     // Get the title of the event
     fn title(self: @TContractState) -> ByteArray;
@@ -116,14 +114,6 @@ mod WantPool {
 
     fn recipient_shares(self: @ContractState) -> Array<u256> {
       return self.recipient_shares.read().array().unwrap();
-    }
-
-    fn lfgoooo(ref self: ContractState, token_address: ContractAddress, amount: u256) {
-      let this = get_contract_address();
-      let sender = get_caller_address();
-      IERC20Dispatcher{ contract_address: token_address }.transfer_from(sender, this, amount);
-      let given = self.participation_tracker.read((sender, token_address));
-      self.participation_tracker.write((sender, token_address), given + amount);
     }
 
     fn payout(ref self: ContractState, token_addresses: Array<ContractAddress>) {

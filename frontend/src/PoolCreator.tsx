@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { useAccount, useProvider } from "@starknet-react/core";
 import Dialog from "./components/ui/Dialog";
 import { CircularProgress, Button, Typography, Input, Textarea, Stack } from "@mui/joy";
-import { EMPTY_BYTE_ARRAY, POOL_ABI, POOL_CLASS_HASH } from "./consts";
-import { CallData } from "starknet";
+import { EMPTY_BYTE_ARRAY, POOL_ABI } from "./consts";
+import { CallData, Contract } from "starknet";
 import { ByteArray, byteArrayFromString, stringFromByteArray } from "./utils";
 import { LinkType, VoyagerLink } from "./VoyagerLink";
+import { CONTRACT_FACTORY } from "./starknet_assets/contracts/contractFactory";
 
 // This type holds all the arguments for the constructor of the EventPool contract.
 type EventPoolConstructorArgs = {
@@ -35,10 +36,11 @@ const PoolCreator = () => {
 
         try {
             console.log(constructor_args)
-
             const constructorCalldata = calldataCompiler.compile('constructor', constructor_args);
 
-            const deployResponse = await account.deployContract({ classHash: POOL_CLASS_HASH, constructorCalldata });
+            const factoryContract = new Contract(CONTRACT_FACTORY.class.abi, CONTRACT_FACTORY.address, provider)
+            factoryContract.connect(account);
+            const deployResponse = await factoryContract.deploy(constructorCalldata);
             await provider.waitForTransaction(deployResponse.transaction_hash);
 
             setDeployedContractAddress(deployResponse.contract_address);

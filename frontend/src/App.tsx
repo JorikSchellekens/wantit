@@ -1,39 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 // import { useBlock } from "@starknet-react/core";
 import { Sheet, Stack } from "@mui/joy";
 import EventPool from "./EventPool";
 import Header from "./components/Header";
-import { FILTER_POOLS, POOL_CLASS_HASH } from "./consts";
-import { Contract } from "./types";
+import { FILTER_POOLS } from "./consts";
 import PoolCreator from "./PoolCreator";
+import { useContractRead } from "@starknet-react/core";
+import { CONTRACT_FACTORY } from "./starknet_assets/contracts/contractFactory";
 
 
 
 function App() {
   // Store the result of the fetch in a state variable
-  const [contractList, setContractList] = useState<string[]>([]);
+  const { data } = useContractRead({
+    functionName: "get_all_contracts",
+    abi: CONTRACT_FACTORY.class.abi,
+    address: CONTRACT_FACTORY.address,
+    watch: true,
+  });
 
-  useEffect(() => {
-    fetch(`https://goerli.voyager.online/api/class/${POOL_CLASS_HASH}/contracts?ps=10&p=1`).then((result) =>
-      // Parse the JSON result and handle errors
-      result.json().then((result) => {
-        setContractList(result.items.map((contract: Contract) => contract.address));
-      
-  })
-    );
-    setInterval(() => {
-      fetch(`https://goerli.voyager.online/api/class/${POOL_CLASS_HASH}/contracts?ps=10&p=1`).then((result) =>
-        // Parse the JSON result and handle errors
-        result.json().then((result) => {
-          if (result.items !== contractList) setContractList(result.items.map((contract: Contract) => contract.address));
-        })
-      )
-    }, 15000);
-  }, []);
-
+  let contractList: string[] = [];
+  if (Array.isArray(data) && data.every(item => typeof item === 'bigint')) {
+    contractList = (data as bigint[]).map((item: bigint) => "0x" + item.toString(16));
+  }
 
 
   const eventPools = contractList.filter((address) => !FILTER_POOLS.includes(address)).map((contractAddress, index) => {
+    
     return <EventPool key={index} contractAddress={contractAddress} />
   });
 
@@ -43,7 +36,7 @@ function App() {
       <Header />
       <Sheet sx={{ width: '100%', margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '90vh' }} variant="solid">
         {/* <Header /> */}
-        <Stack sx={{width: '100%', maxWidth: '1300px'}}>
+        <Stack sx={{ width: '100%', maxWidth: '1300px' }}>
           {eventPools}
           <PoolCreator />
         </Stack>

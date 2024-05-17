@@ -7,7 +7,7 @@ import Dialog from "./components/ui/Dialog";
 import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { LinkType, VoyagerLink } from "./VoyagerLink";
 import { useContract, useContractRead, useContractWrite, useNetwork, useProvider } from "@starknet-react/core";
-import { ERC20_ABI, GOERLI_TOKENS, LOADING_EVENT, POOL_ABI } from "./consts";
+import { ERC20_ABI, SEPOLIA_TOKENS, LOADING_EVENT, POOL_ABI } from "./consts";
 import { constants } from "starknet";
 import strk_icon from "./assets/STRK.svg"
 import eth_icon from "./assets/ETH.png"
@@ -158,7 +158,7 @@ function EventPool({ contractAddress }: PoolProps) {
     // Get the event pool token balance in ETH and STRK
     const { data: ethBalance } = useContractRead({
         functionName: "balance_of",
-        address: GOERLI_TOKENS.ETH,
+        address: SEPOLIA_TOKENS.ETH,
         abi: ERC20_ABI,
         args: [contractAddress],
         watch: true,
@@ -166,20 +166,20 @@ function EventPool({ contractAddress }: PoolProps) {
     if (ethBalance !== undefined) {
         console.log({ethBalance})
         // @ts-expect-error we know the data format
-        event.poolBalances[GOERLI_TOKENS.ETH] = ethBalance;
+        event.poolBalances[SEPOLIA_TOKENS.ETH] = ethBalance;
     }
 
     // Get the event pool token balance in STRK
     const { data: strkBalance } = useContractRead({
         functionName: "balance_of",
-        address: GOERLI_TOKENS.STRK,
+        address: SEPOLIA_TOKENS.STRK,
         abi: ERC20_ABI,
         args: [contractAddress],
         watch: true,
     })
     if (strkBalance !== undefined) {
         // @ts-expect-error we know the data format
-        event.poolBalances[GOERLI_TOKENS.STRK] = strkBalance;
+        event.poolBalances[SEPOLIA_TOKENS.STRK] = strkBalance;
     }
 
     // Get the event pool success criteria
@@ -194,8 +194,8 @@ function EventPool({ contractAddress }: PoolProps) {
         event.successCriteria = stringFromByteArray(successCriteriaData);
     }
 
-    const { contract: ethContract } = useContract({abi: ERC20_ABI, address: GOERLI_TOKENS.ETH});
-    const { contract: strkContract } = useContract({abi: ERC20_ABI, address: GOERLI_TOKENS.STRK});
+    const { contract: ethContract } = useContract({abi: ERC20_ABI, address: SEPOLIA_TOKENS.ETH});
+    const { contract: strkContract } = useContract({abi: ERC20_ABI, address: SEPOLIA_TOKENS.STRK});
 
     const [value, setValue] = React.useState('1320');
 
@@ -255,11 +255,11 @@ function EventPool({ contractAddress }: PoolProps) {
                 <Stack direction="row" spacing={3} alignItems="left">
                     <Stack direction="row" spacing={1} sx={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                         <img src={eth_icon} alt="ETH" style={{ verticalAlign: 'middle', width: '20px', height: '30px' }} />
-                        <p>{(parseFloat(event.poolBalances[GOERLI_TOKENS.ETH]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
+                        <p>{(parseFloat(event.poolBalances[SEPOLIA_TOKENS.ETH]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
                     </Stack>
                     <Stack direction="row" spacing={2} sx={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                         <img src={strk_icon} alt="STRK" style={{ verticalAlign: 'middle', width: '30px', height: '30px' }} />
-                        <p>{(parseFloat(event.poolBalances[GOERLI_TOKENS.STRK]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
+                        <p>{(parseFloat(event.poolBalances[SEPOLIA_TOKENS.STRK]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
                     </Stack>
                 </Stack>
             </Stack>
@@ -273,11 +273,11 @@ function EventPool({ contractAddress }: PoolProps) {
                     <Stack direction="row" spacing={3} alignItems="left">
                         <Stack direction="row" spacing={1} sx={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                             <img src={eth_icon} alt="ETH" style={{ verticalAlign: 'middle', width: '20px', height: '30px' }} />
-                            <p>{(parseFloat(event.poolBalances[GOERLI_TOKENS.ETH]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
+                            <p>{(parseFloat(event.poolBalances[SEPOLIA_TOKENS.ETH]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
                         </Stack>
                         <Stack direction="row" spacing={1} sx={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                             <img src={strk_icon} alt="STRK" style={{ verticalAlign: 'middle', width: '30px', height: '30px' }} />
-                            <p>{(parseFloat(event.poolBalances[GOERLI_TOKENS.STRK]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
+                            <p>{(parseFloat(event.poolBalances[SEPOLIA_TOKENS.STRK]?.toString()) / 10**18 ).toLocaleString(undefined, {maximumFractionDigits: 18})}</p>
                         </Stack>
                     </Stack>
                     <Typography level="h4">Will you make it happen??</Typography>
@@ -316,11 +316,11 @@ function EventPool({ contractAddress }: PoolProps) {
                             <Stack direction="row" spacing={1} alignItems="left">
                                     <Stack direction="row" spacing={1} sx={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                                         <img src={eth_icon} alt="ETH" style={{ verticalAlign: 'middle', width: '20px', height: '30px' }} />
-                                        <p>{(event.poolBalances[GOERLI_TOKENS.ETH] ? event.poolBalances[GOERLI_TOKENS.ETH] * BigInt(payout.proportion) / 100n : 0).toLocaleString()}</p>
+                                        <p>{(event.poolBalances[SEPOLIA_TOKENS.ETH] ? event.poolBalances[SEPOLIA_TOKENS.ETH] * BigInt(payout.proportion) / 100n : 0).toLocaleString()}</p>
                                     </Stack>
                                     <Stack direction="row" spacing={1} sx={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                                         <img src={strk_icon} alt="STRK" style={{ verticalAlign: 'middle', width: '30px', height: '30px' }} />
-                                        <p>{(event.poolBalances[GOERLI_TOKENS.STRK] ? event.poolBalances[GOERLI_TOKENS.STRK] * BigInt(payout.proportion) / 100n : 0).toLocaleString()}</p>
+                                        <p>{(event.poolBalances[SEPOLIA_TOKENS.STRK] ? event.poolBalances[SEPOLIA_TOKENS.STRK] * BigInt(payout.proportion) / 100n : 0).toLocaleString()}</p>
                                     </Stack>
                                     <p>to</p>
                                 <VoyagerLink identity={payout.identity} type={LinkType.Identity}/>
