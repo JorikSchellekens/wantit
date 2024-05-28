@@ -56,8 +56,8 @@ const PoolCreator = () => {
         title: EMPTY_BYTE_ARRAY,
         wish: EMPTY_BYTE_ARRAY,
         success_criteria: EMPTY_BYTE_ARRAY,
-        recipients: [],
-        recipient_shares: [0n],
+        recipients: [""],
+        recipient_shares: [1n],
         oracle: '',
     });
 
@@ -77,7 +77,7 @@ const PoolCreator = () => {
     };
 
     const addRecipient = () => {
-        setFormData({ ...formData, recipients: [...formData.recipients, ''], "recipient_shares": [...formData["recipient_shares"], 0n] });
+        setFormData({ ...formData, recipients: [...formData.recipients, ''], "recipient_shares": [...formData["recipient_shares"], 1n] });
     };
 
     const removeRecipient = (index: number) => {
