@@ -25,7 +25,7 @@ function App() {
   }
 
 
-  const eventPools = contractList.filter((address) => !FILTER_POOLS.includes(address)).map((contractAddress, index) => {
+  const eventPools = contractList.reverse().filter((address) => !FILTER_POOLS.includes(address)).map((contractAddress, index) => {
     
     return <EventPool key={index} contractAddress={contractAddress} />
   });
