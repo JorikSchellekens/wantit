@@ -6,7 +6,7 @@ import { Event } from "./types";
 import Dialog from "./components/ui/Dialog";
 import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { LinkType, VoyagerLink } from "./VoyagerLink";
-import { useContract, useContractRead, useContractWrite, useNetwork, useProvider } from "@starknet-react/core";
+import { useAccount, useContract, useContractRead, useContractWrite, useNetwork, useProvider } from "@starknet-react/core";
 import { ERC20_ABI, SEPOLIA_TOKENS, LOADING_EVENT, POOL_ABI } from "./consts";
 import { constants } from "starknet";
 import strk_icon from "./assets/STRK.svg"
@@ -197,7 +197,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { contract: ethContract } = useContract({abi: ERC20_ABI, address: SEPOLIA_TOKENS.ETH});
     const { contract: strkContract } = useContract({abi: ERC20_ABI, address: SEPOLIA_TOKENS.STRK});
 
-    const [value, setValue] = React.useState('1320');
+    const [value, setValue] = React.useState('0.5');
 
     const calls = useMemo(() => {
         const bigVal = BigInt(parseFloat(value || "0") * 10**18);
@@ -209,7 +209,7 @@ function EventPool({ contractAddress }: PoolProps) {
                 if (strkContract === undefined) return [];
                 return strkContract.populateTransaction["transfer"]!(contractAddress, {low: bigVal % 2n**251n, high: bigVal / 2n**251n});
         }
-    }, [value, contractAddress, selectedSymbol]);
+    }, [value, contractAddress, selectedSymbol, ethContract, strkContract]);
 
 
 	const {
@@ -220,17 +220,39 @@ function EventPool({ contractAddress }: PoolProps) {
 		calls,
 	});
 
-    console.log({data})
-    console.log({isPending})
-
     const totalProportions = event.payouts.reduce((acc, payout) => acc + payout.proportion, 0);
     let resolutionStrategy;
+    const { address } = useAccount();
+
+    const { contract: poolContract } = useContract({abi: POOL_ABI, address: contractAddress});
+
+    const payoutCall = useMemo(() => {
+        if (!poolContract) return [];
+        return poolContract.populateTransaction["payout"]!([SEPOLIA_TOKENS.ETH, SEPOLIA_TOKENS.STRK]);
+    }, [poolContract]);
+
+    const {
+        writeAsync: writeAsyncPayout,
+    } = useContractWrite({
+        calls: payoutCall,
+    });
+
     switch (event.resolutionStrategy.type) {
         case 'coordinator':
             resolutionStrategy =
                 <Box>
-                    <Typography>This event is managed by an unkown address. Please carefully check the legitimacy of the address.</Typography>
+                    <Typography>This event is managed by an unkown address. Please carefully check the legitimacy and powers of the address (e.g. is this a trusted person in your community, is it a dao with a vote? is it some other smart contract triggered by an oracle?).</Typography>
                     <Typography>Address: <VoyagerLink identity={event.resolutionStrategy.coordinator} type={LinkType.Identity}/></Typography>
+                    {address === event.resolutionStrategy.coordinator.address && (
+                            <Stack direction="column" spacing={2}>
+                                <br />
+                                <Typography level="h4">You are the resolver for the pool</Typography>
+                                <Typography>As the coordinator, you have the ability to resolve this event and distribute the pool to the recipients.</Typography>
+                                <Button onClick={async () => {
+                                    await writeAsyncPayout();
+                                }}>Resolve Event</Button>
+                            </Stack>
+                    )}
                 </Box>;
             break;
         case 'UMA':
@@ -266,7 +288,6 @@ function EventPool({ contractAddress }: PoolProps) {
             <Dialog title={event.title} buttonTitle="Believe">
                 <Stack direction="column" spacing={2} justifyContent="space-between" alignItems="left" className="px-4 py-2">
                     <Box sx={{ fontSize: '16px', color: '#666' }}>{event.description}</Box>
-                    <Box sx={{ fontSize: '16px', color: '#666' }}>{event.successCriteria}</Box>
                     <Typography>Pool Contract: <VoyagerLink identity={{address: contractAddress}} type={LinkType.Identity}/></Typography>
                     <Divider />
                     <Typography level="h4">Total Pool</Typography>
@@ -330,11 +351,14 @@ function EventPool({ contractAddress }: PoolProps) {
                         )}
                     </Stack>
                     <Divider />
+                    <Typography level="h4">Success Criteria</Typography>
+                    <Box sx={{ fontSize: '16px', color: '#666' }}>The precise definition of what the oracle must verify will be written here. It is currently missing because there is some bug in the contract creation :/{event.successCriteria}</Box>
                     <Typography level="h4">Pool Resolution Strategy</Typography>
                     <Stack direction="column" spacing={2} alignItems="left">
                         {resolutionStrategy}
                     </Stack>
                 </Stack>
+                
             </Dialog>
 
         </Stack>
@@ -343,3 +367,4 @@ function EventPool({ contractAddress }: PoolProps) {
 
 
 export default EventPool;
+
