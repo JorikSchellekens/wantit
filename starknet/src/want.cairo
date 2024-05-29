@@ -15,7 +15,7 @@ trait IWantIt<TContractState> {
     // Get the recipients of the event
     fn recipients(self: @TContractState) -> Array<ContractAddress>;
     // Get the shares of the recipients of the event
-    fn recipient_shares(self: @TContractState) -> Array<u256>;
+    fn recipient_shares(self: @TContractState) -> Array<u8>;
     // Get the completion status of the event
     fn completed(self: @TContractState) -> bool;
     // This function 'should' return the funds in the pool to the
@@ -41,7 +41,7 @@ mod WantPool {
   #[derive(Drop, Clone, Serde, Store)]
   struct Recipient {
     address: ContractAddress,
-    shares: u256,
+    shares: u8,
   }
 
   #[storage]
@@ -52,7 +52,7 @@ mod WantPool {
     oracle: ContractAddress,
     recipients: List<ContractAddress>,
     // The sum of all shares cannot exceed 2^256
-    recipient_shares: List<u256>,
+    recipient_shares: List<u8>,
     // TODO: remove this and replace with an indexing solution
     // Type: (UserAddress, TokenAddress) -> u256
     participation_tracker: LegacyMap<(ContractAddress, ContractAddress), u256>,
@@ -72,7 +72,7 @@ mod WantPool {
     // The accounts which will be rewarded for the event occuring
     recipients: Array<ContractAddress>,
     // The share of the total pool each recipient will receive
-    recipient_shares: Array<u256>,
+    recipient_shares: Array<u8>,
     // The oracle which will trigger the payout
     oracle: ContractAddress,
   ) {
@@ -112,7 +112,7 @@ mod WantPool {
       return self.recipients.read().array().unwrap();
     }
 
-    fn recipient_shares(self: @ContractState) -> Array<u256> {
+    fn recipient_shares(self: @ContractState) -> Array<u8> {
       return self.recipient_shares.read().array().unwrap();
     }
 
@@ -122,6 +122,7 @@ mod WantPool {
       let this = get_contract_address();
 
       assert(caller == oracle, 'Only oracle can trigger payout');
+
       // We will compute the total number of proportional shares
       let recipient_shares = @self.recipient_shares.read();
       let recipients = @self.recipients.read();
@@ -132,7 +133,8 @@ mod WantPool {
         if i == recipient_shares.len() {
           break;
         }
-        total_shares += recipient_shares[i];
+        total_shares += recipient_shares[i].try_into().unwrap();
+        i += 1;
       };
 
       // Similar to below but we loop through tokens first and then recipients
@@ -148,12 +150,12 @@ mod WantPool {
           if j == recipient_shares.len() {
             break;
           }
-          let recipient_shares = recipient_shares[j];
-          // TODO: Double check for precision errors
-          // Might error out if we have consistent round up
-          let amount = (total_amount * recipient_shares) / total_shares;
+          let recipient_share: u256 = recipient_shares[j].try_into().unwrap();
+          let amount = (total_amount * recipient_share) / total_shares;
           IERC20Dispatcher{ contract_address: token_address }.transfer(recipients[j], amount);
+          j += 1;
         };
+        i += 1;
       };
 
       self.completed.write(true);

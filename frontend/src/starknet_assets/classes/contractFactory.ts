@@ -155,7 +155,7 @@ const FACTORY_ABI = [
 ];
 
 export const CONTRACT_FACTORY_CLASS : class_ = {
-    classhash: "0x00317a042c78f922fd95b685fba537304b121faba54d7c12a4d23764b9bcbc42",
+    classhash: "0x05d5726fe336a6e80b3c116aa3c946dc34da95aefae0617c5212079afbfc027b",
     abi: FACTORY_ABI
 };
 

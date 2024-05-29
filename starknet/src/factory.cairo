@@ -4,13 +4,13 @@ use array::ArrayTrait;
 #[starknet::interface]
 trait IFactory<TContractState> {
     fn get_class_hash(self: @TContractState) -> ClassHash;
-    fn deploy(ref self: TContractState, title: ByteArray, wish: ByteArray, success_criteria: ByteArray, recipients: Array<ContractAddress>, recipient_shares: Array<u256>, oracle: ContractAddress) -> ContractAddress;
+    fn deploy(ref self: TContractState, title: ByteArray, wish: ByteArray, success_criteria: ByteArray, recipients: Array<ContractAddress>, recipient_shares: Array<u8>, oracle: ContractAddress) -> ContractAddress;
     fn get_all_contracts(self: @TContractState) -> Array<ContractAddress>;
     fn get_contract_count(self: @TContractState) -> u128;
 }
 
 #[starknet::contract]
-mod contractFactory{
+mod ContractFactory{
     use core::starknet::event::EventEmitter;
     use core::serde::Serde;
     use starknet::{ContractAddress, ClassHash, get_caller_address, Zeroable};
@@ -60,7 +60,7 @@ mod contractFactory{
             wish: ByteArray, // A short description of what is required to trigger the payout
             success_criteria: ByteArray, // The success criteria for the event which results in the payout
             recipients: Array<ContractAddress>, // The accounts which will be rewarded for the event occurring
-            recipient_shares: Array<u256>, // The share of the total pool each recipient will receive
+            recipient_shares: Array<u8>, // The share of the total pool each recipient will receive
             oracle: ContractAddress, // The oracle which will trigger the payout
         ) -> ContractAddress {
             // Prepare constructor arguments for the new contract

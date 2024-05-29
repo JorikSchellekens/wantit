@@ -13,8 +13,8 @@ source = "git+https://github.com/openzeppelin/cairo-contracts#2815498b82e7cbc163
 
 [[package]]
 name = "snforge_std"
-version = "0.17.0"
-source = "git+https://github.com/foundry-rs/starknet-foundry.git?tag=v0.17.0#63f7f0b533a3d852e2b60214e0f40b99c9dcbb26"
+version = "0.24.0"
+source = "git+https://github.com/foundry-rs/starknet-foundry.git?tag=v0.24.0#95e9fb09cb91b3c05295915179ee1b55bf923653"
 
 [[package]]
 name = "wantit"

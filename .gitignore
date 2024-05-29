@@ -1,2 +1,8 @@
-target
-venv
+# Ignore build output directory
+target/
+
+# Ignore Python virtual environment directory
+venv/
+
+# Ignore environment variable file
+.env

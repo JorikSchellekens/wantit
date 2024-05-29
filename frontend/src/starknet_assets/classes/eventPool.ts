@@ -186,6 +186,6 @@ const POOL_ABI = [
 ]
 
 export const EVENT_POOL_CLASS : class_ = {
-    classhash: "0x0437330ab9d9f443e2f7a069a3a5420b4c083f4ce2481608910794315c4f1abd",
+    classhash: "0x00a6810a8a006f681f82b0020b4477ec7f0ca63fa6e6efdc238b24c1c8e08f7f",
     abi: POOL_ABI,
 }
