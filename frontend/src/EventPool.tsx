@@ -7,11 +7,12 @@ import Dialog from "./components/ui/Dialog";
 import { NumericFormat, NumericFormatProps } from 'react-number-format';
 import { LinkType, VoyagerLink } from "./VoyagerLink";
 import { useAccount, useContract, useContractRead, useContractWrite, useNetwork, useProvider } from "@starknet-react/core";
-import { ERC20_ABI, SEPOLIA_TOKENS, LOADING_EVENT, POOL_ABI } from "./consts";
+import { ERC20_ABI, SEPOLIA_TOKENS, LOADING_EVENT } from "./consts";
 import { constants } from "starknet";
 import strk_icon from "./assets/STRK.svg"
 import eth_icon from "./assets/ETH.png"
 import { stringFromByteArray } from "./utils";
+import { EVENT_POOL_CLASS } from "./starknet_assets/classes/eventPool";
 
 
 interface CustomProps {
@@ -89,7 +90,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { data: titleData } = useContractRead({
         functionName: "title",
         address: contractAddress,
-        abi: POOL_ABI,
+        abi: EVENT_POOL_CLASS.abi,
         watch: true,
     })
     if (titleData !== undefined) {
@@ -102,7 +103,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { data: descriptionData } = useContractRead({
         functionName: "wish",
         address: contractAddress,
-        abi: POOL_ABI,
+        abi: EVENT_POOL_CLASS.abi,
         watch: true,
     })
     if (descriptionData !== undefined) {
@@ -115,7 +116,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { data: recipientsData } = useContractRead({
         functionName: "recipients",
         address: contractAddress,
-        abi: POOL_ABI,
+        abi: EVENT_POOL_CLASS.abi,
         watch: true,
     })
     if (recipientsData !== undefined) {
@@ -129,7 +130,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { data: sharesData } = useContractRead({
         functionName: "recipient_shares",
         address: contractAddress,
-        abi: POOL_ABI,
+        abi: EVENT_POOL_CLASS.abi,
         watch: true,
     })
     if (sharesData !== undefined) {
@@ -143,7 +144,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { data: resolverData } = useContractRead({
         functionName: "oracle",
         address: contractAddress,
-        abi: POOL_ABI,
+        abi: EVENT_POOL_CLASS.abi,
         watch: true,
     })
     if (resolverData !== undefined) {
@@ -186,7 +187,7 @@ function EventPool({ contractAddress }: PoolProps) {
     const { data: successCriteriaData } = useContractRead({
         functionName: "success_criteria",
         address: contractAddress,
-        abi: POOL_ABI,
+        abi: EVENT_POOL_CLASS.abi,
         watch: true,
     })
     if (successCriteriaData !== undefined) {
@@ -200,18 +201,24 @@ function EventPool({ contractAddress }: PoolProps) {
     const [value, setValue] = React.useState('0.5');
 
     const calls = useMemo(() => {
+        if (ethContract === undefined || strkContract === undefined) return [];
         const bigVal = BigInt(parseFloat(value || "0") * 10**18);
+        console.log({bigVal})
+        let ret;
         switch(selectedSymbol) {
             case 'ETH':
-                if (ethContract === undefined) return [];
-                return ethContract.populateTransaction["transfer"]!(contractAddress, {low: bigVal % 2n**251n, high: bigVal / 2n**251n});
+                ret = ethContract.populateTransaction["transfer"]!(contractAddress, {low: bigVal % 2n**251n, high: bigVal / 2n**251n});
+                break;
             case 'STRK':
-                if (strkContract === undefined) return [];
-                return strkContract.populateTransaction["transfer"]!(contractAddress, {low: bigVal % 2n**251n, high: bigVal / 2n**251n});
+                ret = strkContract.populateTransaction["transfer"]!(contractAddress, {low: bigVal % 2n**251n, high: bigVal / 2n**251n});
+                break;
         }
+        console.log(ret)
+        return ret;
     }, [value, contractAddress, selectedSymbol, ethContract, strkContract]);
+    console.log(selectedSymbol)
 
-
+    console.log("calls", calls)
 	const {
 		writeAsync,
 		data,
@@ -224,7 +231,7 @@ function EventPool({ contractAddress }: PoolProps) {
     let resolutionStrategy;
     const { address } = useAccount();
 
-    const { contract: poolContract } = useContract({abi: POOL_ABI, address: contractAddress});
+    const { contract: poolContract } = useContract({abi: EVENT_POOL_CLASS.abi, address: contractAddress});
 
     const payoutCall = useMemo(() => {
         if (!poolContract) return [];
@@ -316,7 +323,7 @@ function EventPool({ contractAddress }: PoolProps) {
                         <Select
                             defaultValue={'ETH'}
                             // @ts-expect-error fuck you
-                            onChange={(event) => setSelectedSymbol(event.target.value)}
+                            onChange={(_, newValue) => setSelectedSymbol(newValue)}
                         >
                             <Option value={'ETH'}>
                                 ETH
@@ -358,9 +365,7 @@ function EventPool({ contractAddress }: PoolProps) {
                         {resolutionStrategy}
                     </Stack>
                 </Stack>
-                
             </Dialog>
-
         </Stack>
     );
 }

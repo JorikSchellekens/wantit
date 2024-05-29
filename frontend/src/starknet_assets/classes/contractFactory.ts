@@ -75,7 +75,7 @@ const FACTORY_ABI = [
           },
           {
             "name": "recipient_shares",
-            "type": "core::array::Array::<core::integer::u256>"
+            "type": "core::array::Array::<core::integer::u8>"
           },
           {
             "name": "oracle",

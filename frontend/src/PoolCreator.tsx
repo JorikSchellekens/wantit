@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { useAccount, useProvider } from "@starknet-react/core";
 import Dialog from "./components/ui/Dialog";
 import { CircularProgress, Button, Typography, Input, Textarea, Stack } from "@mui/joy";
-import { EMPTY_BYTE_ARRAY, POOL_ABI } from "./consts";
+import { EMPTY_BYTE_ARRAY } from "./consts";
 import { CallData, Contract } from "starknet";
 import { ByteArray, byteArrayFromString, stringFromByteArray } from "./utils";
 import { LinkType, VoyagerLink } from "./VoyagerLink";
+import { EVENT_POOL_CLASS } from "./starknet_assets/classes/eventPool";
 import { CONTRACT_FACTORY } from "./starknet_assets/contracts/contractFactory";
 
 // This type holds all the arguments for the constructor of the EventPool contract.
@@ -18,7 +19,7 @@ type EventPoolConstructorArgs = {
     oracle: string;
 };
 
-const calldataCompiler = new CallData(POOL_ABI);
+const calldataCompiler = new CallData(EVENT_POOL_CLASS.abi);
 
 const PoolCreator = () => {
     const { account } = useAccount();
