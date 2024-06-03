@@ -19,6 +19,7 @@
   width: 100vw;
   background-color: var(--background-color);
   color: var(--foreground-color);
+  overflow-x: hidden;
 }
 /* Importing fonts */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap');
