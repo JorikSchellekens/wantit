@@ -52,8 +52,12 @@ export const About = () => {
                                 <AccordionDetails><Typography>
                                     NFTs are automatically created for each bribe. Twenty NFTs will be minted - ten for ETH contributors and ten for STRK contributors.
                                     The NFTs are minted randomly proportionally to the amount each contributor has contributed. These are badges of honour for supporting the initiative.
-                                    They can also be sold on the secondary market. They are NFTs afterall :).
+                                    They can also be sold on the secondary market. They are NFTs afterall :.
                                 </Typography></AccordionDetails>
+                            </Accordion>
+                            <Accordion>
+                                <AccordionSummary><Typography level="h4">Do supports get rewarded?</Typography></AccordionSummary>
+                                <AccordionDetails><Typography>Not explicitely, some lucky few get a commemorative NFT.</Typography></AccordionDetails>
                             </Accordion>
                             <Accordion>
                                 <AccordionSummary><Typography level="h4">How is this different to crowdfunding?</Typography></AccordionSummary>
