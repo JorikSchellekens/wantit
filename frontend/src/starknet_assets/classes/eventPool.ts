@@ -8,20 +8,6 @@ const POOL_ABI = [
   },
   {
     "type": "struct",
-    "name": "core::integer::u256",
-    "members": [
-      {
-        "name": "low",
-        "type": "core::integer::u128"
-      },
-      {
-        "name": "high",
-        "type": "core::integer::u128"
-      }
-    ]
-  },
-  {
-    "type": "struct",
     "name": "core::byte_array::ByteArray",
     "members": [
       {
@@ -144,6 +130,39 @@ const POOL_ABI = [
           }
         ],
         "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "fee_address",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "collect_fee",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "categories",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "state_mutability": "view"
       }
     ]
   },
@@ -174,6 +193,18 @@ const POOL_ABI = [
       {
         "name": "oracle",
         "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "fee_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "collect_fee",
+        "type": "core::bool"
+      },
+      {
+        "name": "categories",
+        "type": "core::array::Array::<core::felt252>"
       }
     ]
   },
@@ -183,9 +214,9 @@ const POOL_ABI = [
     "kind": "enum",
     "variants": []
   }
-]
+];
 
-export const EVENT_POOL_CLASS : class_ = {
-    classhash: "0x00a6810a8a006f681f82b0020b4477ec7f0ca63fa6e6efdc238b24c1c8e08f7f",
-    abi: POOL_ABI,
+export const EVENT_POOL_CLASS: class_ = {
+  classhash: "0x00a6810a8a006f681f82b0020b4477ec7f0ca63fa6e6efdc238b24c1c8e08f7f",
+  abi: POOL_ABI,
 }

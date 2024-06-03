@@ -3,17 +3,24 @@ import {
   StarknetConfig,
   argent,
   braavos,
-  publicProvider,
   useInjectedConnectors,
 } from "@starknet-react/core";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./globals.css";
+import { jsonRpcProvider } from "@starknet-react/core";
+import { Chain } from "@starknet-react/chains";
+
+function rpc(chain: Chain) {
+  return {
+    nodeUrl: `https://starknet-${chain.network}.public.blastapi.io`
+  }
+}
 
 function Root({ children }: { children: React.ReactNode }) {
   const chains = [sepolia, mainnet, devnet];
-  const provider = publicProvider();
+  const provider = jsonRpcProvider({ rpc });
   const { connectors } = useInjectedConnectors({
     // Show these connectors if the user has no connector installed.
     recommended: [argent(), braavos()],

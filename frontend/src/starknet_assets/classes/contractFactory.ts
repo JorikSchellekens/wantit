@@ -25,16 +25,16 @@ const FACTORY_ABI = [
     ]
   },
   {
-    "type": "struct",
-    "name": "core::integer::u256",
-    "members": [
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
       {
-        "name": "low",
-        "type": "core::integer::u128"
+        "name": "False",
+        "type": "()"
       },
       {
-        "name": "high",
-        "type": "core::integer::u128"
+        "name": "True",
+        "type": "()"
       }
     ]
   },
@@ -80,6 +80,18 @@ const FACTORY_ABI = [
           {
             "name": "oracle",
             "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "fee_address",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "collect_fee",
+            "type": "core::bool"
+          },
+          {
+            "name": "categories",
+            "type": "core::array::Array::<core::felt252>"
           }
         ],
         "outputs": [
@@ -110,6 +122,17 @@ const FACTORY_ABI = [
           }
         ],
         "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "fee_address",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
       }
     ]
   },
@@ -120,12 +143,16 @@ const FACTORY_ABI = [
       {
         "name": "contractClassHash",
         "type": "core::starknet::class_hash::ClassHash"
+      },
+      {
+        "name": "fee_address",
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
   {
     "type": "event",
-    "name": "wantit::factory::contractFactory::ContractCreated",
+    "name": "wantit::factory::ContractFactory::ContractCreated",
     "kind": "struct",
     "members": [
       {
@@ -142,20 +169,20 @@ const FACTORY_ABI = [
   },
   {
     "type": "event",
-    "name": "wantit::factory::contractFactory::Event",
+    "name": "wantit::factory::ContractFactory::Event",
     "kind": "enum",
     "variants": [
       {
         "name": "contractCreated",
-        "type": "wantit::factory::contractFactory::ContractCreated",
+        "type": "wantit::factory::ContractFactory::ContractCreated",
         "kind": "nested"
       }
     ]
   }
 ];
 
-export const CONTRACT_FACTORY_CLASS : class_ = {
-    classhash: "0x05d5726fe336a6e80b3c116aa3c946dc34da95aefae0617c5212079afbfc027b",
-    abi: FACTORY_ABI
+export const CONTRACT_FACTORY_CLASS: class_ = {
+  classhash: "0x05d5726fe336a6e80b3c116aa3c946dc34da95aefae0617c5212079afbfc027b",
+  abi: FACTORY_ABI
 };
 

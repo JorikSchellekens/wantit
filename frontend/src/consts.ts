@@ -1,6 +1,16 @@
 import { Event } from "./types";
 import { ByteArray } from "./utils";
 
+export const CATEGORIES = [
+  "sports",
+  "music",
+  "movies",
+  "technology",
+  "activism",
+  "xxx",
+  "lol",
+]
+
 export const LOADING_EVENT: Event = {
   title: "Loading",
   description: "Loading",

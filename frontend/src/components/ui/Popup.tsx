@@ -1,20 +1,15 @@
 import { Button, Card, Stack, Typography } from "@mui/joy";
-import React from "react";
+import React, { ReactNode, CSSProperties } from "react";
 
-export function Dialog({
+export default function Popup({
   children,
   title,
-  buttonTitle,
-  style,
-  isActive
-}: { children: React.ReactNode; title: string, buttonTitle: string, style?: React.CSSProperties, isActive?: boolean}) {
-  const [isOpen, setIsOpen] = React.useState(isActive || false);
+  setIsOpen,
+  style
+}: { children: ReactNode; title: string, setIsOpen: (isOpen: boolean) => void, style?: CSSProperties}) {
 
   return (
     <div>
-      <Button onClick={() => setIsOpen(true)}>{buttonTitle}</Button>
-      {isOpen && (
-        <>
         <div style={{
           position: "fixed",
           top: 0,
@@ -32,24 +27,20 @@ export function Dialog({
           top:"50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          height: "80%",
-          overflowY: "auto",
           zIndex: 4,
         }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" >
+            <Stack direction="row" justifyContent="space-between" alignItems="center" className="px-4 py-2">
               <Typography level="h3">{title}</Typography>
               <Button
                 type="button"
-                sx={{ position: "absolute", right: "15px", top: "15px" }}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {console.log("clicked"); setIsOpen(false)}}
+                className="rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-300 font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
               >
                 x
               </Button>
             </Stack>
             {children}
         </Card>
-        </>
-      )}
     </div>
   );
 }

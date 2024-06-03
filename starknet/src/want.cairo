@@ -18,6 +18,12 @@ trait IWantIt<TContractState> {
     fn recipient_shares(self: @TContractState) -> Array<u8>;
     // Get the completion status of the event
     fn completed(self: @TContractState) -> bool;
+    // Get the fee collecting address
+    fn fee_address(self: @TContractState) -> ContractAddress;
+    // Is fee collection enabled
+    fn collect_fee(self: @TContractState) -> bool;
+    // Categories this event falls under
+    fn categories(self: @TContractState) -> Array<felt252>;
     // This function 'should' return the funds in the pool to the
     // participants. However, this is likely much too expensive
     // due to the storage costs of all the participant addresses.
@@ -51,13 +57,11 @@ mod WantPool {
     success_criteria: ByteArray,
     oracle: ContractAddress,
     recipients: List<ContractAddress>,
-    // The sum of all shares cannot exceed 2^256
     recipient_shares: List<u8>,
-    // TODO: remove this and replace with an indexing solution
-    // Type: (UserAddress, TokenAddress) -> u256
-    participation_tracker: LegacyMap<(ContractAddress, ContractAddress), u256>,
-    // Whether the event has been completed
     completed: bool,
+    fee_address: ContractAddress,
+    collect_fee: bool,
+    categories: List<felt252>,
   }
 
   #[constructor]
@@ -75,6 +79,14 @@ mod WantPool {
     recipient_shares: Array<u8>,
     // The oracle which will trigger the payout
     oracle: ContractAddress,
+    // The address which will collect the fees
+    fee_address: ContractAddress,
+    // Whether to enable the fee collection mechanism
+    collect_fee: bool,
+    // Categories this event falls under
+    // The categories are abitrary. I assume the community will slowly establish
+    // a common set of categories which can be used to filter events.
+    categories: Array<felt252>,
   ) {
     self.title.write(title);
     self.wish.write(wish);
@@ -82,6 +94,10 @@ mod WantPool {
     let _ = recipients_list.append_span(recipients.span());
     let mut recipient_shares_list = self.recipient_shares.read();
     let _ = recipient_shares_list.append_span(recipient_shares.span());
+    let mut categories_list = self.categories.read();
+    let _ = categories_list.append_span(categories.span());
+    self.fee_address.write(fee_address);
+    self.collect_fee.write(collect_fee);
     self.oracle.write(oracle);
   }
 
@@ -116,6 +132,18 @@ mod WantPool {
       return self.recipient_shares.read().array().unwrap();
     }
 
+    fn categories(self: @ContractState) -> Array<felt252> {
+      return self.categories.read().array().unwrap();
+    }
+
+    fn fee_address(self: @ContractState) -> ContractAddress {
+      return self.fee_address.read();
+    }
+
+    fn collect_fee(self: @ContractState) -> bool {
+      return self.collect_fee.read();
+    }
+
     fn payout(ref self: ContractState, token_addresses: Array<ContractAddress>) {
       let caller = get_caller_address();
       let oracle = self.oracle.read();
@@ -144,7 +172,14 @@ mod WantPool {
           break;
         }
         let token_address = *token_addresses.at(i);
-        let total_amount = IERC20Dispatcher{ contract_address: token_address }.balance_of(this);
+        let mut total_amount = IERC20Dispatcher{ contract_address: token_address }.balance_of(this);
+        // if we are collecting fees, we will take a 1% fee
+        if self.collect_fee.read() {
+          let fee = total_amount / 100;
+          IERC20Dispatcher{ contract_address: token_address }.transfer(self.fee_address.read(), fee);
+          total_amount -= fee;
+        }
+
         let mut j = 0;
         loop {
           if j == recipient_shares.len() {

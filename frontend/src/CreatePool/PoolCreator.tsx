@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useAccount, useProvider } from "@starknet-react/core";
-import Dialog from "./components/ui/Dialog";
-import { CircularProgress, Button, Typography, Input, Textarea, Stack } from "@mui/joy";
-import { EMPTY_BYTE_ARRAY } from "./consts";
+import { Dialog } from "../components/ui/Dialog";
+import { CircularProgress, Button, Typography, Input, Textarea, Stack, Checkbox } from "@mui/joy";
+import { CATEGORIES, EMPTY_BYTE_ARRAY } from "../consts";
 import { CallData, Contract } from "starknet";
-import { ByteArray, byteArrayFromString, stringFromByteArray } from "./utils";
-import { LinkType, VoyagerLink } from "./VoyagerLink";
-import { EVENT_POOL_CLASS } from "./starknet_assets/classes/eventPool";
-import { CONTRACT_FACTORY } from "./starknet_assets/contracts/contractFactory";
+import { ByteArray, byteArrayFromString, stringFromByteArray } from "../utils";
+import { LinkType, VoyagerLink } from "../VoyagerLink";
+import { EVENT_POOL_CLASS } from "../starknet_assets/classes/eventPool";
+import { CONTRACT_FACTORY } from "../starknet_assets/contracts/contractFactory";
+import { MultiSelector } from "../components/ui/MultiSelector";
 
 // This type holds all the arguments for the constructor of the EventPool contract.
 type EventPoolConstructorArgs = {
@@ -17,6 +18,8 @@ type EventPoolConstructorArgs = {
     recipients: string[];
     "recipient_shares": bigint[];
     oracle: string;
+    payFee: boolean;
+    categories: string[];
 };
 
 const calldataCompiler = new CallData(EVENT_POOL_CLASS.abi);
@@ -60,11 +63,14 @@ const PoolCreator = () => {
         recipients: [""],
         recipient_shares: [1n],
         oracle: '',
+        payFee: true,
+        categories: [],
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof EventPoolConstructorArgs) => {
         let val: string | ByteArray = e.target.value;
         if (field === 'title' || field === 'wish' || field === 'success_criteria') {
+            // Convert string to bytes with encoding javascript style
             val = byteArrayFromString(val);
         }
 
@@ -93,8 +99,12 @@ const PoolCreator = () => {
         await handleDeploy(formData);
     };
 
+    const togglePayFee = () => {
+        setFormData({ ...formData, payFee: !formData.payFee });
+    };
+
     return (
-        <Dialog title="What do you want?" buttonTitle="Create Pool" style={{ maxHeight: "90%", overflowY: "scroll" }}>
+        <Dialog title="What do you want?" buttonTitle="Create Pool">
             {isDeploying ? (
                 <Stack flex="column" alignItems="center">
                     <CircularProgress />
@@ -108,7 +118,7 @@ const PoolCreator = () => {
             ) :
                 <>
                     <Typography level="h4">
-                        Title for the Degens
+                        Title
                     </Typography>
                     <Input
                         type="text"
@@ -116,27 +126,57 @@ const PoolCreator = () => {
                         onChange={(e) => handleChange(e, 'title')}
                         placeholder="The bolder the statement, the better."
                     />
+                    <Typography level="h4">
+                        Description
+                    </Typography>
                     <Typography>
-                        Describe and motivate your mission, what do you wish the world had, experienced or achieved? Why should someone else ape in with you?
+                        What do you wish the world had, experienced or achieved? Why should someone else ape in with you?
                         You control the narrative. You set the demand curve. You are the oracle of the future.
                     </Typography>
                     <Textarea
                         value={stringFromByteArray(formData.wish)}
                         onChange={(e) => handleChange(e, 'wish')}
-                        placeholder="You know what you missed, we all missed it. We all want it. We all need it. We all deserve it. If we had it the world would be different. You can help me. We can make it happen."
+                        placeholder="You know what you want - we all want it. We all need it. We all deserve it. If we had it the world would be different. You can help me. We can make it happen."
+                        minRows={4}
                     />
+                    <Typography level="h4">
+                        Success Criteria
+                    </Typography>
                     <Typography>
                         What makes your event a success?
-                        This needs to be indisputable - water tight. Think it through, make sure it can&apost be misinterpreted. Succinct and measurable is better.
+                        This needs to be indisputable - water tight. Think it through, make sure it can&apos;t be misinterpreted. Succinct and measurable is better.
+                        <br />
+                        <br />
+                        This is what the resolver will use to decide on whether the event has happened.
                     </Typography>
                     <Textarea
                         value={stringFromByteArray(formData["success_criteria"])}
                         onChange={(e) => handleChange(e, 'success_criteria')}
                         placeholder="Linda punches a bear in the face before midnight, while balancing baclava on her head.    Pics or it didn't happen."
                         style={{ margin: "10px 0" }}
+                        minRows={3}
                     />
                     <Typography level="h3">
-                        Recipients
+                        Tags
+                    </Typography>
+                    <Typography>
+                        Add tags to help people find your event.
+                    </Typography>
+                    <MultiSelector
+                        options={CATEGORIES}
+                        selectedOptions={formData.categories}
+                        onChange={(values) => {
+                            setFormData({ ...formData, categories: values });
+                        }}
+                    />
+                    <Typography level="h3">
+                        Targets
+                    </Typography>
+                    <Typography>
+                        Who are the targets of the bribe? Who needs to be convinced to make this happen? Who should be fairly rewarded for the event happening?
+                        <br />
+                        <br />
+                        Each recipient gets a &apos;share&apos; of the total bribe. The shares are added up and the total bribe is split between the recipients according to their shares.
                     </Typography>
                     {formData.recipients.map((recipient, index) => (
                         <Stack direction="column" gap={1} key={index}>
@@ -151,6 +191,9 @@ const PoolCreator = () => {
                                         onChange={(e) => handleArrayChange(e, 'recipients', index)}
                                         placeholder="Recipient Address"
                                     />
+                                    <Typography>
+                                        Recipient Share
+                                    </Typography>
                                     <Input
                                         type="text"
                                         value={formData["recipient_shares"][index].toString()}
@@ -170,16 +213,22 @@ const PoolCreator = () => {
                         Add Recipient
                     </Button>
                     <Typography level="h3" style={{ marginTop: "10px" }}>
-                        Oracle
+                        Resolver
                     </Typography>
                     <Typography>
-                        Provide the address of the oracle that will trigger the payout.
+                        Provide the address of the person or contract that will provide proof and trigger the payout.
                     </Typography>
                     <Input
                         type="text"
                         value={formData.oracle}
                         onChange={(e) => handleChange(e, 'oracle')}
                         placeholder="Oracle Address"
+                    />
+                    <br />
+                    <Checkbox
+                        label="Donate 1% of the raised amount to the protocol devs"
+                        checked={formData.payFee}
+                        onChange={togglePayFee}
                     />
                     <Button onClick={handleSubmit} color="primary" style={{ margin: "20px 0" }}>
                         Deploy Event Pool Contract

@@ -98,6 +98,7 @@ export type ByteArray = {
 
 
 export function byteArrayFromString(myString: string): ByteArray {
+    // Convert utf8 to raw bytes first
     if (myString.length === 0) {
         return {
             data: ['0x00'],
