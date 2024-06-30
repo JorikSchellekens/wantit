@@ -107,10 +107,9 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     }
 
     function contribute(IERC20 token, uint256 amount) external nonReentrant {
-        require(!completed, "Want has been completed");
-        require(!expired, "Want has expired");
-        require(block.timestamp < expiryTimestamp, "Want has expired");
         require(amount > 0, "Contribution must be greater than 0");
+        require(block.timestamp < expiryTimestamp, "Want has expired");
+        require(status == Status.PENDING, "Want has been granted");
 
         if (address(tokenInfos[token].token) == address(0)) {
             _addSupportedToken(token);
@@ -131,12 +130,14 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     function wantGranted() external {
         require(msg.sender == oracle, "Only oracle can grant want");
         require(status == Status.PENDING, "Want has already been granted");
+        require(block.timestamp < expiryTimestamp, "Want has expired");
+
         status = Status.PASSED;
     }
 
     function payout(address[] calldata tokenAddresses) external nonReentrant {
         require(status == Status.PASSED, "Want has not been granted");
-        require(block.timestamp < expiryTimestamp, "Want has expired");
+
         uint256 totalShares = 0;
         for (uint i = 0; i < recipients.length; i++) {
             totalShares += recipients[i].shares;
@@ -169,14 +170,12 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     }
 
     function claimContribution(IERC20 token) external nonReentrant {
-        require(status == Status.PASSED, "Want has been granted");
         require(block.timestamp >= expiryTimestamp, "Want has not expired yet");
+        require(status == Status.PENDIND, "Want has not been granted");
         require(address(tokenInfos[token].token) != address(0), "Token not supported");
 
-        if (status == Status.PASSED) {
-            status = Status.EXPIRED;
-            emit WantExpired();
-        }
+        status = Status.EXPIRED;
+        emit WantExpired();
 
         TokenInfo storage tokenInfo = tokenInfos[token];
         uint256 contributionAmount = balanceOf(msg.sender, tokenInfo.nftId);
