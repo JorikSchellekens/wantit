@@ -18,6 +18,12 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
         uint256 nftId;
     }
 
+    enum Status {
+        PENDIND,
+        EXPIRED,
+        PASSED
+    }
+
     uint256 private _tokenIds;
     uint256 public constant WANT_TOKEN_ID = 0;
 
@@ -28,15 +34,13 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     address public feeAddress;
     bool public collectFee;
     uint256 public expiryTimestamp;
+    Status public status;
 
     Recipient[] public recipients;
     string[] public categories;
 
     mapping(IERC20 => TokenInfo) public tokenInfos;
     IERC20[] public supportedTokens;
-
-    bool public completed;
-    bool public expired;
 
     event Contribution(address indexed contributor, address indexed token, uint256 amount, uint256 tokenId);
     event Payout(address[] tokens, uint256[] amounts);
@@ -73,6 +77,8 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
 
     recipients = _recipients;
     categories = _categories;
+    
+    status = Status.PENDING;
 
     _mint(address(this), WANT_TOKEN_ID, 1, "");
 
@@ -122,22 +128,28 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
         emit Contribution(msg.sender, address(token), amount, tokenInfo.nftId);
     }
 
-    function payout() external nonReentrant {
-        require(msg.sender == oracle, "Only oracle can trigger payout");
-        require(!completed, "Payout already completed");
-        require(!expired, "Want has expired");
-        require(block.timestamp < expiryTimestamp, "Want has expired");
+    function wantGranted() external {
+        require(msg.sender == oracle, "Only oracle can grant want");
+        require(status == Status.PENDING, "Want has already been granted");
+        status = Status.PASSED;
+    }
 
+    function payout(address[] calldata tokenAddresses) external nonReentrant {
+        require(status == Status.PASSED, "Want has not been granted");
+        require(block.timestamp < expiryTimestamp, "Want has expired");
         uint256 totalShares = 0;
         for (uint i = 0; i < recipients.length; i++) {
             totalShares += recipients[i].shares;
         }
 
-        address[] memory tokenAddresses = new address[](supportedTokens.length);
-        uint256[] memory payoutAmounts = new uint256[](supportedTokens.length);
+        uint256[] memory payoutAmounts = new uint256[](tokenAddresses.length);
 
-        for (uint i = 0; i < supportedTokens.length; i++) {
-            IERC20 token = supportedTokens[i];
+        for (uint i = 0; i < tokenAddresses.length; i++) {
+            IERC20 token = IERC20(tokenAddresses[i]);
+            if (address(tokenInfos[token].token) == address(0)) {
+                continue; // Skip unsupported tokens
+            }
+
             uint256 totalAmount = token.balanceOf(address(this));
 
             if (collectFee) {
@@ -151,21 +163,18 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
                 require(token.transfer(recipients[j].addr, amount), "Recipient transfer failed");
                 payoutAmounts[i] += amount;
             }
-
-            tokenAddresses[i] = address(token);
         }
 
-        completed = true;
         emit Payout(tokenAddresses, payoutAmounts);
     }
 
     function claimContribution(IERC20 token) external nonReentrant {
-        require(!completed, "Want has been completed");
+        require(status == Status.PASSED, "Want has been granted");
         require(block.timestamp >= expiryTimestamp, "Want has not expired yet");
         require(address(tokenInfos[token].token) != address(0), "Token not supported");
 
-        if (!expired) {
-            expired = true;
+        if (status == Status.PASSED) {
+            status = Status.EXPIRED;
             emit WantExpired();
         }
 
