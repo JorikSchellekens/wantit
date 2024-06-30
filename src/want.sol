@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract MultiTokenWantPool is ERC1155, ReentrancyGuard {
+contract Want is ERC1155, ReentrancyGuard {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
