@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
-contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
+contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable, IERC1155Receiver {
     struct Recipient {
         address addr;
         uint8 shares;
@@ -244,5 +245,33 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
 
     function getCategories() external view returns (string[] memory) {
         return categories;
+    }
+
+    // Implement the onERC1155Received function
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        // Add your custom logic here if needed
+
+        // Return the magic value to indicate successful receipt
+        return this.onERC1155Received.selector;
+    }
+
+    // Implement the onERC1155BatchReceived function if needed
+    function onERC1155BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        // Add your custom logic here if needed
+
+        // Return the magic value to indicate successful receipt
+        return this.onERC1155BatchReceived.selector;
     }
 }
