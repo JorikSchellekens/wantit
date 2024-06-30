@@ -109,6 +109,7 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable, 
         require(amount > 0, "Contribution must be greater than 0");
         require(block.timestamp < expiryTimestamp, "Want has expired");
         require(status == Status.PENDING, "Want has been granted");
+        require(tokenInfos[token].nftId != 0, "Token not supported");
 
         // if (tokenInfos[token].nftId == 0) {
         //     _addSupportedToken(token);
