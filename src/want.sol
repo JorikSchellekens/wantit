@@ -13,13 +13,12 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     }
 
     struct TokenInfo {
-        IERC20 token;
         uint256 totalContributions;
         uint256 nftId;
     }
 
     enum Status {
-        PENDIND,
+        PENDING,
         EXPIRED,
         PASSED
     }
@@ -90,13 +89,12 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
 }
 
     function _addSupportedToken(IERC20 token) internal {
-        require(address(tokenInfos[token].token) == address(0), "Token already supported");
+        require(tokenInfos[token].nftId != 0, "Token already supported");
         
         _tokenIds++;
         uint256 newTokenId = _tokenIds;
         
         tokenInfos[token] = TokenInfo({
-            token: token,
             totalContributions: 0,
             nftId: newTokenId
         });
@@ -111,9 +109,9 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
         require(block.timestamp < expiryTimestamp, "Want has expired");
         require(status == Status.PENDING, "Want has been granted");
 
-        if (address(tokenInfos[token].token) == address(0)) {
-            _addSupportedToken(token);
-        }
+        // if (tokenInfos[token].nftId == 0) {
+        //     _addSupportedToken(token);
+        // }
 
         TokenInfo storage tokenInfo = tokenInfos[token];
         
@@ -147,7 +145,7 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
 
         for (uint i = 0; i < tokenAddresses.length; i++) {
             IERC20 token = IERC20(tokenAddresses[i]);
-            if (address(tokenInfos[token].token) == address(0)) {
+            if (tokenInfos[token].nftId == 0) {
                 continue; // Skip unsupported tokens
             }
 
@@ -171,8 +169,8 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
 
     function claimContribution(IERC20 token) external nonReentrant {
         require(block.timestamp >= expiryTimestamp, "Want has not expired yet");
-        require(status == Status.PENDIND, "Want has not been granted");
-        require(address(tokenInfos[token].token) != address(0), "Token not supported");
+        require(status != Status.PASSED, "Want has not been granted");
+        require(tokenInfos[token].nftId != 0, "Token not supported");
 
         status = Status.EXPIRED;
         emit WantExpired();
@@ -191,16 +189,35 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     }
 
     function getContributionNFT(address contributor, IERC20 token) external view returns (uint256, uint256) {
-        require(address(tokenInfos[token].token) != address(0), "Token not supported");
+        require(tokenInfos[token].nftId != 0, "Token not supported");
         TokenInfo storage tokenInfo = tokenInfos[token];
         return (tokenInfo.nftId, balanceOf(contributor, tokenInfo.nftId));
     }
+
+    function buildMetadataURI(uint256 tokenId) public view returns (string memory) {
+        return string(
+            abi.encodePacked(
+                '{"name":"', title,
+                '", "description":"', wish,
+                '", "image":"', ">>>>>>TODO<<<<<<<",
+                '", "attributes":', "[",
+                    (tokenId == 0) ? "" :
+                    '{"trait_type":"token", "value":"', _uint2str(uint256(uint160(address(supportedTokens[tokenId - 1])))), '"}'
+                    '{"trait_type":"expiry", "value":"', _uint2str(expiryTimestamp), '"}'
+                    '{"trait_type":"status", "value":"', status, '"}'
+                    '{"trait_type":"oracle", "value":"', oracle, '"}'
+                    '{"trait_type":"successCriteria", "value":"', successCriteria, '"}'
+                    ']'
+                '}'
+            )
+        );
+    } 
 
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
         require(tokenId <= _tokenIds, "URI query for nonexistent token");
         // Return a URI that includes the token ID and contribution amount
         // You would need to implement a proper metadata server to handle these URIs
-        return string(abi.encodePacked(super.uri(tokenId), "/", _uint2str(tokenId)));
+        return buildMetadataURI(tokenId);
     }
 
     function _uint2str(uint256 _i) internal pure returns (string memory str) {
