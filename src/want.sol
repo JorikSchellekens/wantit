@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Want is ERC1155, ReentrancyGuard {
+contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     struct Recipient {
         address addr;
         uint8 shares;
     }
 
     struct TokenInfo {
-        IERC20 token;
         uint256 totalContributions;
         uint256 nftId;
     }
@@ -20,13 +20,13 @@ contract Want is ERC1155, ReentrancyGuard {
     uint256 private _tokenIds;
     uint256 public constant WANT_TOKEN_ID = 0;
 
-    bytes32 public immutable title;
-    bytes32 public immutable wish;
-    bytes32 public immutable successCriteria;
-    address public immutable oracle;
-    address public immutable feeAddress;
-    bool public immutable collectFee;
-    uint256 public immutable expiryTimestamp;
+    bytes32 public title;
+    bytes32 public wish;
+    bytes32 public successCriteria;
+    address public oracle;
+    address public feeAddress;
+    bool public collectFee;
+    uint256 public expiryTimestamp;
 
     Recipient[] public recipients;
     string[] public categories;
@@ -44,43 +44,43 @@ contract Want is ERC1155, ReentrancyGuard {
     event WantExpired();
     event ContributionReturned(address indexed contributor, address indexed token, uint256 amount);
 
-    constructor(
-        string memory _title,
-        string memory _wish,
-        string memory _successCriteria,
-        Recipient[] memory _recipients,
-        address _oracle,
-        address _feeAddress,
-        bool _collectFee,
-        string[] memory _categories,
-        string memory _uri,
-        IERC20[] memory _initialSupportedTokens,
-        uint256 _expiryTimestamp
-    ) ERC1155(_uri) {
-        require(_expiryTimestamp > block.timestamp, "Expiry must be in the future");
+    function initialize(
+    string memory _title,
+    string memory _wish,
+    string memory _successCriteria,
+    Recipient[] memory _recipients,
+    address _oracle,
+    address _feeAddress,
+    bool _collectFee,
+    string[] memory _categories,
+    string memory _uri,
+    IERC20[] memory _initialSupportedTokens,
+    uint256 _expiryTimestamp
+) external initializer {
+    require(_expiryTimestamp > block.timestamp, "Expiry must be in the future");
 
-        title = bytes32(bytes(_title));
-        wish = bytes32(bytes(_wish));
-        successCriteria = bytes32(bytes(_successCriteria));
-        oracle = _oracle;
-        feeAddress = _feeAddress;
-        collectFee = _collectFee;
-        expiryTimestamp = _expiryTimestamp;
+    __ERC1155_init(_uri);
+    __ReentrancyGuard_init();
 
-        // Directly assign recipients and categories
-        recipients = _recipients;
-        categories = _categories;
+    title = bytes32(bytes(_title));
+    wish = bytes32(bytes(_wish));
+    successCriteria = bytes32(bytes(_successCriteria));
+    oracle = _oracle;
+    feeAddress = _feeAddress;
+    collectFee = _collectFee;
+    expiryTimestamp = _expiryTimestamp;
 
-        // Mint a single "Want" NFT
-        _mint(address(this), WANT_TOKEN_ID, 1, "");
+    recipients = _recipients;
+    categories = _categories;
 
-        // Add initial supported tokens
-        uint256 tokenLength = _initialSupportedTokens.length;
-        for (uint256 i = 0; i < tokenLength;) {
-            _addSupportedToken(_initialSupportedTokens[i]);
-            unchecked { ++i; }
-        }
+    _mint(address(this), WANT_TOKEN_ID, 1, "");
+
+    uint256 tokenLength = _initialSupportedTokens.length;
+    for (uint256 i = 0; i < tokenLength;) {
+        _addSupportedToken(_initialSupportedTokens[i]);
+        unchecked { ++i; }
     }
+}
 
     function _addSupportedToken(IERC20 token) internal {
         require(address(tokenInfos[token].token) == address(0), "Token already supported");
