@@ -213,10 +213,9 @@ const POOL_ABI = [
     "name": "wantit::want::WantPool::Event",
     "kind": "enum",
     "variants": []
-  }
-];
+  }];
 
 export const EVENT_POOL_CLASS: class_ = {
-  classhash: "0x00a6810a8a006f681f82b0020b4477ec7f0ca63fa6e6efdc238b24c1c8e08f7f",
+  classhash: "0x0075378f45ad5d71ae0aad20fe26c45c97f1cbd83def88f2f04eb6b83106da2e",
   abi: POOL_ABI,
 }

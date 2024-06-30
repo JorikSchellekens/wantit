@@ -1,205 +1,244 @@
-import React from "react";
-import { StarknetIdNavigator } from "starknetid.js";
-// import { useBlock } from "@starknet-react/core";
-import { Card, Grid, Stack, Typography } from "@mui/joy";
-import { Event } from "../types";
-import { ERC20_ABI, SEPOLIA_TOKENS, LOADING_EVENT } from "../consts";
-import { constants } from "starknet";
-import strk_icon from "../assets/STRK.svg"
-import eth_icon from "../assets/ETH.png"
-import { stringFromByteArray } from "../utils";
-import { EVENT_POOL_CLASS } from "../starknet_assets/classes/eventPool";
-import { EventPoolPopup } from "./EventPoolPopup";
-import { useContractRead, useNetwork, useProvider } from "@starknet-react/core";
 
+import { Box, Button, CircularProgress, Divider, Input, Option, Select, Stack, Typography } from '@mui/joy';
+import { useAccount, useContract, useContractWrite } from '@starknet-react/core';
+import React, { useMemo, useState } from 'react';
+import { NumericFormat, NumericFormatProps } from 'react-number-format';
+import { LinkType, VoyagerLink } from '../VoyagerLink';
+import eth_icon from "../assets/ETH.png";
+import strk_icon from "../assets/STRK.svg";
+import { ERC20_ABI, SEPOLIA_TOKENS } from '../consts';
+import { EVENT_POOL_CLASS } from '../starknet_assets/classes/eventPool';
+import { getEventData } from './Utils';
+import { useParams } from 'react-router-dom';
+import { MainLayout } from '../MainLayout';
 
-// The pools props is an event
-interface PoolProps {
-    contractAddress: string;
-    isActive: boolean;
+interface CustomProps {
+    onChange: (event: { target: { name: string; value: string } }) => void;
+    name: string;
 }
 
+const NumericFormatAdapter = React.forwardRef<NumericFormatProps, CustomProps>(
+    function NumericFormatAdapter(props, ref) {
+        const { onChange, ...other } = props;
 
-function dec2hex(str: bigint) { // .toString(16) only works up to 2^53
-    const dec = str.toString().split(''), sum = [], hex = [];
-    let i, s
-    while (dec.length) {
-        // @ts-expect-error we know we won't overshoot
-        s = 1 * dec.shift()
-        for (i = 0; s || i < sum.length; i++) {
-            s += (sum[i] || 0) * 10
-            sum[i] = s % 16
-            s = (s - sum[i]) / 16
+        return (
+            <NumericFormat
+                {...other}
+                getInputRef={ref}
+                onValueChange={(values) => {
+                    onChange({
+                        target: {
+                            name: props.name,
+                            value: values.value,
+                        },
+                    });
+                }}
+                thousandSeparator
+                valueIsNumericString
+                prefix=""
+            />
+        );
+    },
+);
+export function EventPool() {
+    const { contractAddress: ca_ } = useParams<{ contractAddress: string }>();
+    const contractAddress = ca_ || "";
+    const event = getEventData({ contractAddress });
+    const [selectedSymbol, setSelectedSymbol] = useState('ETH');
+    const [value, setValue] = useState('0.5');
+    const { address } = useAccount();
+
+    const { contract: ethContract } = useContract({ abi: ERC20_ABI, address: SEPOLIA_TOKENS.ETH });
+    const { contract: strkContract } = useContract({ abi: ERC20_ABI, address: SEPOLIA_TOKENS.STRK });
+    const { contract: poolContract } = useContract({ abi: EVENT_POOL_CLASS.abi, address: contractAddress });
+
+    const calls = useMemo(() => {
+        if (ethContract === undefined || strkContract === undefined) return [];
+        const bigVal = BigInt(parseFloat(value || "0") * 10 ** 18);
+        let ret;
+        switch (selectedSymbol) {
+            case 'ETH':
+                ret = ethContract.populateTransaction["transfer"]!(contractAddress, { low: bigVal % 2n ** 251n, high: bigVal / 2n ** 251n });
+                break;
+            case 'STRK':
+                ret = strkContract.populateTransaction["transfer"]!(contractAddress, { low: bigVal % 2n ** 251n, high: bigVal / 2n ** 251n });
+                break;
         }
+        return ret;
+    }, [value, contractAddress, selectedSymbol, ethContract, strkContract]);
+
+    const {
+        writeAsync,
+        data,
+        isPending,
+    } = useContractWrite({
+        calls,
+    });
+
+    const payoutCall = useMemo(() => {
+        if (!poolContract) return [];
+        return poolContract.populateTransaction["payout"]!([SEPOLIA_TOKENS.ETH, SEPOLIA_TOKENS.STRK]);
+    }, [poolContract]);
+
+    const {
+        writeAsync: writeAsyncPayout,
+    } = useContractWrite({
+        calls: payoutCall,
+    });
+
+    const totalProportions = event.payouts.reduce((acc, payout) => acc + payout.proportion, 0);
+    let resolutionStrategy;
+    switch (event.resolutionStrategy.type) {
+        case 'coordinator':
+            resolutionStrategy = (
+                <Box>
+                    <Typography>
+                        This event is managed by a coordinator address. Please carefully check the legitimacy and powers of the address (e.g. is this a trusted person in your community, is it a DAO with a vote? is it some other smart contract triggered by an oracle?).
+                    </Typography>
+                    <Typography>
+                        Coordinator Address: <VoyagerLink identity={event.resolutionStrategy.coordinator} type={LinkType.Identity} />
+                    </Typography>
+                    {address === event.resolutionStrategy.coordinator.address && (
+                        <Stack direction="column" spacing={2}>
+                            <br />
+                            <Divider />
+                            <Typography level="h4">You are the coordinator for this pool</Typography>
+                            <Typography>As the coordinator, you have the ability to resolve this event and distribute the pool to the recipients.</Typography>
+                            <Button onClick={async () => await writeAsyncPayout()}>
+                                Resolve Event
+                            </Button>
+                        </Stack>
+                    )}
+                </Box>
+            );
+            break;
+        case 'UMA':
+            resolutionStrategy = (
+                <Box>
+                    <Typography>
+                        This event is managed by the UMA Optimistic Oracle with a dispute resolution system. Disputes are resolved by UMA tokenholders and protected by the UMA treasury.
+                    </Typography>
+                    <Typography>
+                        Please note, there is no specific address for UMA resolution as it is a decentralized process.
+                    </Typography>
+                </Box>
+            );
+            break;
+        case 'DAO':
+            resolutionStrategy = (
+                <Box>
+                    <Typography>
+                        This event is managed by a DAO. The DAO controls the resolution via a vote.
+                    </Typography>
+                    <Typography>
+                        DAO Contract: <VoyagerLink identity={event.resolutionStrategy.DAO} type={LinkType.Identity} />
+                    </Typography>
+                </Box>
+            );
+            break;
     }
-    while (sum.length) {
-        // @ts-expect-error we know we won't overshoot
-        hex.push(sum.pop().toString(16))
-    }
-    return hex.join('')
-}
 
 
-// An eventpool is a collection of liquidity which can permissionlessly be added to.
-// The event pool has an event attached to it and a list of addresses to which
-// the pool will be distributed. The pool is distributed to the addresses when the event attached occurs.
-// The pool has a value which can be made of any number of tokens.
-// Users can add to the pool by clicking the "believe" button.
-// The believe button pops up a modal which gives a short discription
-function EventCard({ event, contractAddress, isActive }: { event: Event, contractAddress: string, isActive: boolean }) {
+    // parse the categories
+
     return (
-        <Card sx={{ height: '300px'}}>
-            <Stack spacing={2} sx={{overflow: "hidden", height: '100%', justifyContent: 'space-between'}}>
-                <Stack spacing={2} sx={{overflow: "hidden", textOverflow: "ellipsis"}}>
-                <Typography level="h4">{event.title}</Typography>
-                <Typography sx={{overflow: "hidden", textOverflow: "ellipsis"}}>{event.description}</Typography>
+        <MainLayout>
+            <Stack flex="column" spacing={4} sx={{padding: "80px 50px"}}>
+                <Stack direction="row" spacing={2}>
+                    {event.categories.map((category, index) => (
+                        <Typography key={index}>{category}</Typography>
+                    ))}
                 </Stack>
-                <Stack spacing={2}>
-                <Grid container spacing={2} sx={{ justifyContent: 'space-between', flexGrow: 1 }}>
-                    <Grid xs={5} sx={{backgroundColor: 'rgba(0, 0, 0, 0.1)', borderRadius: '10px'}}>
-                        <Stack direction="row" spacing={1}>
+                <Typography level="h2">{event.title}</Typography>
+                <Typography>{event.description}</Typography>
+                <Typography>
+                    Pool Contract: <VoyagerLink identity={{ address: contractAddress }} type={LinkType.Identity} />
+                </Typography>
+                <Divider />
+                <Typography level="h4">Total Pool</Typography>
+                <Stack direction="row" spacing={3}>
+                    <Stack direction="row" spacing={1}>
                         <img src={eth_icon} alt="ETH" style={{ width: '20px', height: '30px' }} />
                         <Typography sx={{ fontWeight: 'bold' }}>
                             {(parseFloat(event.poolBalances[SEPOLIA_TOKENS.ETH]?.toString() || '0') / 10 ** 18).toLocaleString(undefined, { maximumFractionDigits: 18 })}
                         </Typography>
-                        </Stack>
-                    </Grid>
-                    <Grid xs={5} sx={{backgroundColor: 'rgba(0, 0, 0, 0.1)', borderRadius: '10px'}}>
-                        <Stack direction="row" spacing={1}>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
                         <img src={strk_icon} alt="STRK" style={{ width: '30px', height: '30px' }} />
                         <Typography sx={{ fontWeight: 'bold' }}>
                             {(parseFloat(event.poolBalances[SEPOLIA_TOKENS.STRK]?.toString() || '0') / 10 ** 18).toLocaleString(undefined, { maximumFractionDigits: 18 })}
                         </Typography>
-                        </Stack>
-                    </Grid>
-                </Grid>
-                <EventPoolPopup event={event} contractAddress={contractAddress} buttonTitle={"Make it happen"} isActive={isActive}/>
+                    </Stack>
                 </Stack>
+                <Typography level="h4">Will you make it happen?</Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <Input
+                        value={value}
+                        onChange={(event) => setValue(event.target.value)}
+                        placeholder="Amount"
+                        slotProps={{
+                            input: {
+                                component: NumericFormatAdapter,
+                            },
+                        }}
+                    />
+                    <Select
+                        defaultValue="ETH"
+                        onChange={(_, newValue) => setSelectedSymbol(newValue as string)}
+                    >
+                        <Option value="ETH">ETH</Option>
+                        <Option value="STRK">STRK</Option>
+                    </Select>
+                    {isPending ? (
+                        <CircularProgress size="sm" />
+                    ) : data ? (
+                        <VoyagerLink identity={{ address: data.transaction_hash }} type={LinkType.Transaction} />
+                    ) : (
+                        <Button disabled={!value} onClick={() => writeAsync()}>
+                            Send
+                        </Button>
+                    )}
+                </Stack>
+                <Divider />
+                <Typography level="h4">Rewards</Typography>
+                <Stack spacing={2}>
+                    {event.payouts.map((payout, index) => (
+                        <>
+                        <Divider />
+                        <Stack key={index} direction="row" spacing={2} alignItems="center">
+                            <Stack direction="column" spacing={1}>
+                            <Stack direction="row" spacing={1}>
+                                <div style={{ width: '30px', height: '30px', alignContent: 'center' }}>
+                                <img src={eth_icon} alt="ETH" style={{ width: '20px', height: '30px' }} />
+                                </div>
+                                <Typography sx={{ fontWeight: 'bold' }}>
+                                    {(event.poolBalances[SEPOLIA_TOKENS.ETH] ? event.poolBalances[SEPOLIA_TOKENS.ETH] * BigInt(payout.proportion) / 100n : 0).toLocaleString()}
+                                </Typography>
+                            </Stack>
+                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                                <img src={strk_icon} alt="STRK" style={{ width: '30px', height: '30px' }} />
+                                <Typography sx={{ fontWeight: 'bold' }}>
+                                    {(event.poolBalances[SEPOLIA_TOKENS.STRK] ? event.poolBalances[SEPOLIA_TOKENS.STRK] * BigInt(payout.proportion) / 100n : 0).toLocaleString()}
+                                </Typography>
+                            </Stack>
+                            </Stack>
+                            <Typography>to</Typography>
+                            <VoyagerLink identity={payout.identity} type={LinkType.Identity} />
+                            <Typography>
+                                {(payout.proportion / totalProportions * 100).toFixed(0) + "%"}
+                            </Typography>
+                        </Stack>
+                        </>
+                    ))}
+                </Stack>
+                <Divider />
+                <Typography level="h4">Success Criteria</Typography>
+                <Typography>
+                    {event.successCriteria || 'The precise definition of what the oracle must verify will be written here. It is currently missing because there is some bug in the contract creation :/'}
+                </Typography>
+                <Typography level="h4">Pool Resolution Strategy</Typography>
+                {resolutionStrategy}
             </Stack>
-        </Card>
+            </MainLayout>
     );
 }
-
-
-function EventPool({ contractAddress, isActive}: PoolProps) {
-    // Get the title, description and payouts from the contract
-    const event: Event = LOADING_EVENT;
-
-    const { provider } = useProvider();
-    const { chain } = useNetwork();
-    const starknetIdNavigator = new StarknetIdNavigator(
-        provider,
-        `0x${dec2hex(chain.id)}` as unknown as constants.StarknetChainId
-    );
-
-    const { data: titleData } = useContractRead({
-        functionName: "title",
-        address: contractAddress,
-        abi: EVENT_POOL_CLASS.abi,
-        watch: true,
-    })
-    if (titleData !== undefined) {
-        // @ts-expect-error we know the data format
-        event.title = stringFromByteArray(titleData);
-    }
-
-    // Get the description
-    const { data: descriptionData } = useContractRead({
-        functionName: "wish",
-        address: contractAddress,
-        abi: EVENT_POOL_CLASS.abi,
-        watch: true,
-    })
-    if (descriptionData !== undefined) {
-        // @ts-expect-error we know the data format
-        event.description = stringFromByteArray(descriptionData);
-    }
-
-    // Get the payouts
-    // First we fetch the list of recipients
-    const { data: recipientsData } = useContractRead({
-        functionName: "recipients",
-        address: contractAddress,
-        abi: EVENT_POOL_CLASS.abi,
-        watch: true,
-    })
-    if (recipientsData !== undefined) {
-        // @ts-expect-error we know the data format
-        event.payouts = recipientsData.map((recipient: bigint) => {
-            return { identity: { address: `0x${recipient.toString(16)}` }, proportion: 1 }
-        });
-    }
-
-    // Then the list of recipient_shares
-    const { data: sharesData } = useContractRead({
-        functionName: "recipient_shares",
-        address: contractAddress,
-        abi: EVENT_POOL_CLASS.abi,
-        watch: true,
-    })
-    if (sharesData !== undefined) {
-        event.payouts = event.payouts.map((payout, index) => {
-            // @ts-expect-error we know the data format
-            return { identity: payout.identity, proportion: Number(sharesData[index]) }
-        });
-    }
-
-    // Get the resolver address (note we only suport the CoordinatorResolutionStrategy for now)
-    const { data: resolverData } = useContractRead({
-        functionName: "oracle",
-        address: contractAddress,
-        abi: EVENT_POOL_CLASS.abi,
-        watch: true,
-    })
-    if (resolverData !== undefined) {
-        event.resolutionStrategy = { type: "coordinator", coordinator: { address: `0x${resolverData.toString(16)}` } };
-    }
-
-    // Get the starknet id of the coordinators and the recipients if thay have one
-    for (const payout of event.payouts) {
-        starknetIdNavigator.getStarkName(payout.identity.address).then((snid) => payout.identity.snid = snid).catch(console.log);
-    }
-
-    // Get the event pool token balance in ETH and STRK
-    const { data: ethBalance } = useContractRead({
-        functionName: "balance_of",
-        address: SEPOLIA_TOKENS.ETH,
-        abi: ERC20_ABI,
-        args: [contractAddress],
-        watch: true,
-    })
-    if (ethBalance !== undefined) {
-        console.log({ ethBalance })
-        // @ts-expect-error we know the data format
-        event.poolBalances[SEPOLIA_TOKENS.ETH] = ethBalance;
-    }
-
-    // Get the event pool token balance in STRK
-    const { data: strkBalance } = useContractRead({
-        functionName: "balance_of",
-        address: SEPOLIA_TOKENS.STRK,
-        abi: ERC20_ABI,
-        args: [contractAddress],
-        watch: true,
-    })
-    if (strkBalance !== undefined) {
-        // @ts-expect-error we know the data format
-        event.poolBalances[SEPOLIA_TOKENS.STRK] = strkBalance;
-    }
-
-    // Get the event pool success criteria
-    const { data: successCriteriaData } = useContractRead({
-        functionName: "success_criteria",
-        address: contractAddress,
-        abi: EVENT_POOL_CLASS.abi,
-        watch: true,
-    })
-    if (successCriteriaData !== undefined) {
-        // @ts-expect-error we know the data format
-        event.successCriteria = stringFromByteArray(successCriteriaData);
-    }
-
-    return <EventCard event={event} contractAddress={contractAddress} isActive={isActive}/>;
-}
-
-export default EventPool;

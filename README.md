@@ -78,3 +78,42 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 TODO:
 
 1. Keep a track of the creator of the pools
+2. Add a chat / discussion feature for each pool.
+3. Extend with voting polls - should I do x y or z?
+4. Arc pools: Do x, y and z, complete more get more rewards overall
+5. News / tweet streams about this topicx
+
+What if we created the following NFT minting strcuture:
+
+For every token in the pool's whitelist we provide an NFT mint transfer function:
+1. The NFT is minted iff the amount provided to the pool is 10% of the total raised so far
+2. This makes every subsequent NFT exponentially more costly than the last.
+3. This also ads a tollerable amount of ponzinomics to the NFT emission system.
+4. 1 NFT minted to the deployer addres
+5. 1 NFT minted to the protocol deployer address
+
+
+How Voting pools work:
+
+A person sets up a pool which gives the targets (possibly themselves) a set of options to complete
+The oracle resolves the pool if at anytime any ONE of the conditions resolves.
+
+Users add funds to the pool to vote on their preference. Likely the target will enact the request of the highest value pool.
+
+If the highest value pool is completed either (tbd)
+- all funds go to the target addresses?
+- or all the funds of the vote pool go to the target
+- or all and a percentage of the others go to the target
+  note: generally I like that a portion of the other pools go to the winning result because this adds a extra level of intrigue to the outcome. A small advantage in one pool leads to large reward. etc.
+If a lower value outcome occurs then either (tbd)
+- All the funds are returned to users
+- All the funds in the selected pool go to the target address. The rest is returned
+- The funds in the pool with some penalty go to the target address. The rest returned.
+Note that the introduction of the primitive - the funds are returned. Really messes with the
+trust structures and can introduce many more socio economic games that could be considered unfair by users.
+
+In simpler pools, as I've created the money accrues, and it does not get returned to the users. Only a resolution will unlock the funds and only to the target addresses. This makes them more robust, but possible less popular?
+
+
+Deadlines
+Deadlines return the assets to the users if the pools are not resolved on time.

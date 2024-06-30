@@ -27,6 +27,9 @@ export interface Event {
     payouts: { identity: Identity, proportion: number }[];
     poolBalances: ERC20Balances;
     resolutionStrategy: ResolutionStrategy;
+    categories: string[];
+    payFee: boolean;
+    feeAddress: string;
 }
 
 // An ERC20Balance is a token address, a balance, and a name

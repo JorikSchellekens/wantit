@@ -3,7 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import React from "react";
 
-export const About = () => {
+export const About2 = () => {
     return (
         <Stack direction="column" spacing={2} sx={{ width: '100%', margin: 'auto', height: '100%', justifyContent: 'space-between' }}>
             <Stack direction="column" spacing={2}>
@@ -11,11 +11,11 @@ export const About = () => {
                 <Stack direction="column" spacing={2} sx={{ padding: '30px' }}>
                     <Typography level="h1">About</Typography>
                     <Divider />
-                    <Typography level="h2">BribeWith.eth is <b><i>not</i></b> a crowd funding platform</Typography>
-                    <Typography level="h2" sx={{ padding: '30px 0 0 30px' }}>BribeWith.eth lets the Degens <b><i>change the world</i></b></Typography>
+                    <Typography level="h2">ActionMarket is <b><i>not</i></b> a crowd funding platform</Typography>
+                    <Typography level="h2" sx={{ padding: '30px 0 0 30px' }}>ActionMarket lets the Degens <b><i>change the world</i></b></Typography>
                     <Typography level="h2" sx={{ padding: '30px 0 0 60px' }}>Target <b><i>specific people</i></b> with a <b><i>specific request</i></b> and let <b><i>The Degens</i></b> back you up.</Typography>
 
-                    <Typography level="h2" sx={{ padding: '30px 0 0 40%' }}>Together we Bribe</Typography>
+                    <Typography level="h2" sx={{ padding: '30px 0 0 40%' }}>Together we make shit happen</Typography>
                     <Divider />
                     <br />
                     <br />
@@ -85,10 +85,6 @@ export const About = () => {
                             <Accordion>
                                 <AccordionSummary><Typography level="h4">Why should I trust the resolver?</Typography></AccordionSummary>
                                 <AccordionDetails><Typography>Choice in the resolver of the bribe is the most important thing the bribe pool creator can do. This needs to be a credibly neutral entity who will not colude with the recipients. The choice depends on the value you think the pool will accrue and the nature of the comunity who cares about the outcome. For example you might select vitalik to judge whether a livestreamed discussion between Dankrad and Hasu happened. You might choose UMA or a DAO vote for sports venue choice etc. BribeWith.eth will give you all the tools and sane defaults to analyse the trust assumptions in the pools.</Typography></AccordionDetails>
-                            </Accordion>
-                            <Accordion>
-                                <AccordionSummary><Typography level="h4">Extensions to be considered</Typography></AccordionSummary>
-                                <AccordionDetails><Typography>Make the bribe targets sign up so that they explicitely signal that they are taking the liability of accepting the bribes. This way it can get around any legal trouble since it will be the bribee who takes the liability (possibly, needs investigation). Note, this also lets us build up a directory of bribees and possibly resolution addresses but it limits the power of the platform significantly. Easier to monetise however.</Typography></AccordionDetails>
                             </Accordion>
                         </AccordionGroup>
                     </Card>

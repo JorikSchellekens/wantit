@@ -10,7 +10,7 @@ export default function ConnectModal() {
   return (
 
     <Dialog title="Connect Wallet" buttonTitle="ConnectWallet">
-      <Stack justifyContent="center" alignItems="center" spacing={1}>
+      <Stack justifyContent="center" alignItems="center" spacing={1} sx={{height: "auto", width: "300px"}}>
         {connectors.map((connector: Connector) => {
           return (
             <Button
@@ -19,11 +19,20 @@ export default function ConnectModal() {
                 connector.available() ? connect({ connector }) : null
               }
               disabled={!connector.available()}
+              sx={{
+                width: "100%",
+                backgroundColor: "black",
+                color: "white",
+                borderRadius: "10px",
+                padding: "10px",
+              }}
             >
+              <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
               {connector.icon.light && (
-                <img src={connector.icon.dark} />
+                <img src={connector.icon.dark} style={{width: "20px", height: "20px"}}/>
               )}
-              <Typography sx={{color: "white"}}>Connect{connector.name}</Typography>
+              <Typography sx={{color: "white"}}>{connector.name}</Typography>
+              </Stack>
             </Button>
           );
         })}

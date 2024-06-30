@@ -17,7 +17,10 @@ export const LOADING_EVENT: Event = {
   successCriteria: "Loading",
   poolBalances: {},
   payouts: [],
-  resolutionStrategy: { type: "coordinator", coordinator: { address: "Loading" } }
+  resolutionStrategy: { type: "coordinator", coordinator: { address: "Loading" } },
+  categories: [],
+  payFee: false,
+  feeAddress: "0x0"
 };
 
 export const ERC20_ABI = [
@@ -1056,10 +1059,7 @@ export const SEPOLIA_TOKENS = {
 }
 
 export const FILTER_POOLS = [
-  "0x008de6b0c9fbcf578729ea660ffcff90a87ea345b4ec0b4034f3e9da0d0a28e0",
-  "0x044068702e0a774c62dda3c50c69d3d463083c6587fb65c4c1ba721a9896fcaf",
-  "0x06a443b413c0c9ec04a502976a77b7defc0e2949a0a5f6e2632212ce013e37b4",
-  "0x07fa4242a9fa0397e882da87943d9fcd6ffd861e49dbd92cd8b8777fbbe545c9",
+  "0x498f330be3f1eecd70bcf9c37544144d687f697714875f2cc540627555a48a7",
 ]
 
 export const EMPTY_BYTE_ARRAY: ByteArray = {

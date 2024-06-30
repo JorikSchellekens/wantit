@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { useAccount, useProvider } from "@starknet-react/core";
-import { Dialog } from "../components/ui/Dialog";
-import { CircularProgress, Button, Typography, Input, Textarea, Stack, Checkbox } from "@mui/joy";
+import { CircularProgress, Button, Typography, Input, Textarea, Stack, Checkbox, Card } from "@mui/joy";
 import { CATEGORIES, EMPTY_BYTE_ARRAY } from "../consts";
-import { CallData, Contract } from "starknet";
+import { CallData, Contract, shortString } from "starknet";
 import { ByteArray, byteArrayFromString, stringFromByteArray } from "../utils";
 import { LinkType, VoyagerLink } from "../VoyagerLink";
 import { EVENT_POOL_CLASS } from "../starknet_assets/classes/eventPool";
 import { CONTRACT_FACTORY } from "../starknet_assets/contracts/contractFactory";
+import { Link } from "react-router-dom";
+import { MainLayout } from "../MainLayout";
 import { MultiSelector } from "../components/ui/MultiSelector";
+// import { MultiSelector } from "../components/ui/MultiSelector";
 
 // This type holds all the arguments for the constructor of the EventPool contract.
 type EventPoolConstructorArgs = {
@@ -19,7 +21,7 @@ type EventPoolConstructorArgs = {
     "recipient_shares": bigint[];
     oracle: string;
     payFee: boolean;
-    categories: string[];
+    categories: bigint[];
 };
 
 const calldataCompiler = new CallData(EVENT_POOL_CLASS.abi);
@@ -28,6 +30,7 @@ const PoolCreator = () => {
     const { account } = useAccount();
     const { provider } = useProvider();
     const [isDeploying, setIsDeploying] = useState(false);
+    const [deployed, setDeployed] = useState(false);
     const [deployedContractAddress, setDeployedContractAddress] = useState("");
 
     const handleDeploy = async (constructor_args: EventPoolConstructorArgs) => {
@@ -48,11 +51,10 @@ const PoolCreator = () => {
             await provider.waitForTransaction(deployResponse.transaction_hash);
 
             setDeployedContractAddress(deployResponse.contract_address);
+            setDeployed(true);
         } catch (error) {
             console.error("Deployment error:", error);
             alert("Failed to deploy contract.");
-        } finally {
-            setIsDeploying(false);
         }
     };
 
@@ -103,139 +105,169 @@ const PoolCreator = () => {
         setFormData({ ...formData, payFee: !formData.payFee });
     };
 
-    return (
-        <Dialog title="What do you want?" buttonTitle="Create Pool">
-            {isDeploying ? (
-                <Stack flex="column" alignItems="center">
-                    <CircularProgress />
-                    <Typography>Deploying Contract...</Typography>
-                </Stack>
-            ) : deployedContractAddress ? (
-                <>
-                    <Typography>Contract <VoyagerLink identity={{address: deployedContractAddress}} type={LinkType.Identity}/>Deployed Successfully!</Typography>
-                    <Typography>Address: {deployedContractAddress}</Typography>
-                </>
-            ) :
-                <>
-                    <Typography level="h4">
-                        Title
-                    </Typography>
-                    <Input
-                        type="text"
-                        value={stringFromByteArray(formData.title)}
-                        onChange={(e) => handleChange(e, 'title')}
-                        placeholder="The bolder the statement, the better."
-                    />
-                    <Typography level="h4">
-                        Description
-                    </Typography>
+    const Deploying = <Stack flex="column" alignItems="center">
+        <CircularProgress />
+        <Typography>Deploying Contract...</Typography>
+    </Stack>;
+
+    const Deployed = <Stack>
+        <Typography level="h1">Congratulations!</Typography>
+        <Typography>Contract <VoyagerLink identity={{ address: deployedContractAddress }} type={LinkType.Identity} />Deployed Successfully!</Typography>
+        <Typography>Address: {deployedContractAddress}</Typography>
+        <Link to="/"><Button>home</Button></Link>
+    </Stack>
+
+    const Deployer = <Stack flex="column" spacing={4} sx={{ padding: "80px 50px" }}>
+        <Typography level="h1">What do you want?</Typography>
+        <Stack flex="column" spacing={2} >
+            <Typography level="h4">
+                Title
+            </Typography>
+            <Input
+                type="text"
+                value={stringFromByteArray(formData.title)}
+                onChange={(e) => handleChange(e, 'title')}
+                placeholder="The bolder the statement, the better."
+            />
+        </Stack>
+        <Stack flex="column" spacing={2}>
+            <Typography level="h4">
+                Description
+            </Typography>
+            <Typography>
+                What do you wish the world had, experienced or achieved? Why should someone else ape in with you?
+                You control the narrative. You set the demand curve. You are the oracle of the future.
+            </Typography>
+            <Textarea
+                value={stringFromByteArray(formData.wish)}
+                onChange={(e) => handleChange(e, 'wish')}
+                placeholder="You know what you want - we all want it. We all need it. We all deserve it. If we had it the world would be different. You can help me. We can make it happen."
+                minRows={4}
+            />
+        </Stack>
+        <Stack flex="column" spacing={2}>
+            <Typography level="h4">
+                Success Criteria
+            </Typography>
+            <Typography>
+                What makes your event a success?
+                This needs to be indisputable - water tight. Think it through, make sure it can&apos;t be misinterpreted. Succinct and measurable is better.
+                <br />
+                <br />
+                This is what the resolver will use to decide on whether the event has happened.
+            </Typography>
+            <Textarea
+                value={stringFromByteArray(formData["success_criteria"])}
+                onChange={(e) => handleChange(e, 'success_criteria')}
+                placeholder="Linda punches a bear in the face before midnight, while balancing baclava on her head.    Pics or it didn't happen."
+                style={{ margin: "10px 0" }}
+                minRows={3}
+            />
+        </Stack>
+        <Stack flex="column" spacing={2}>
+            <Typography level="h3">
+                Tags
+            </Typography>
+            <Typography>
+                Add tags to help people find your event.
+                <br />
+                Disabled for now
+            </Typography>
+
+            <MultiSelector
+                options={CATEGORIES}
+                selectedOptions={formData.categories.map((category) => shortString.decodeShortString(`0x${category.toString(16)}`))}
+                onChange={(values) => {
+                    setFormData({
+                        ...formData, categories: values.map((value) => {
+                            console.log("asdfasdf")
+                            console.log(value)
+                            console.log(shortString.encodeShortString(value))
+                            return BigInt(shortString.encodeShortString(value))
+                        })
+                    });
+                }}
+            />
+        </Stack>
+        <Stack flex="column" spacing={2} >
+            <Typography level="h3">
+                Targets
+            </Typography>
+            <Typography>
+                Who are the targets of the bribe? Who needs to be convinced to make this happen? Who should be fairly rewarded for the event happening?
+                <br />
+                <br />
+                Each recipient gets a &apos;share&apos; of the total bribe. The shares are added up and the total bribe is split between the recipients according to their shares.
+            </Typography>
+            {formData.recipients.map((recipient, index) => (
+                <Stack direction="column" gap={1} key={index}>
                     <Typography>
-                        What do you wish the world had, experienced or achieved? Why should someone else ape in with you?
-                        You control the narrative. You set the demand curve. You are the oracle of the future.
+                        Recipient {index + 1}
                     </Typography>
-                    <Textarea
-                        value={stringFromByteArray(formData.wish)}
-                        onChange={(e) => handleChange(e, 'wish')}
-                        placeholder="You know what you want - we all want it. We all need it. We all deserve it. If we had it the world would be different. You can help me. We can make it happen."
-                        minRows={4}
-                    />
-                    <Typography level="h4">
-                        Success Criteria
-                    </Typography>
-                    <Typography>
-                        What makes your event a success?
-                        This needs to be indisputable - water tight. Think it through, make sure it can&apos;t be misinterpreted. Succinct and measurable is better.
-                        <br />
-                        <br />
-                        This is what the resolver will use to decide on whether the event has happened.
-                    </Typography>
-                    <Textarea
-                        value={stringFromByteArray(formData["success_criteria"])}
-                        onChange={(e) => handleChange(e, 'success_criteria')}
-                        placeholder="Linda punches a bear in the face before midnight, while balancing baclava on her head.    Pics or it didn't happen."
-                        style={{ margin: "10px 0" }}
-                        minRows={3}
-                    />
-                    <Typography level="h3">
-                        Tags
-                    </Typography>
-                    <Typography>
-                        Add tags to help people find your event.
-                    </Typography>
-                    <MultiSelector
-                        options={CATEGORIES}
-                        selectedOptions={formData.categories}
-                        onChange={(values) => {
-                            setFormData({ ...formData, categories: values });
-                        }}
-                    />
-                    <Typography level="h3">
-                        Targets
-                    </Typography>
-                    <Typography>
-                        Who are the targets of the bribe? Who needs to be convinced to make this happen? Who should be fairly rewarded for the event happening?
-                        <br />
-                        <br />
-                        Each recipient gets a &apos;share&apos; of the total bribe. The shares are added up and the total bribe is split between the recipients according to their shares.
-                    </Typography>
-                    {formData.recipients.map((recipient, index) => (
-                        <Stack direction="column" gap={1} key={index}>
+                    <Stack direction="row" gap={1} alignItems="left">
+                        <Stack direction="column" gap={1} justifyContent="center" alignItems="left" style={{ width: "100%" }}>
+                            <Input
+                                type="text"
+                                value={recipient}
+                                onChange={(e) => handleArrayChange(e, 'recipients', index)}
+                                placeholder="Recipient Address"
+                            />
                             <Typography>
-                                Recipient {index + 1}
+                                Recipient Share
                             </Typography>
-                            <Stack direction="row" gap={1} alignItems="left">
-                                <Stack direction="column" gap={1} justifyContent="center" alignItems="left" style={{ width: "100%" }}>
-                                    <Input
-                                        type="text"
-                                        value={recipient}
-                                        onChange={(e) => handleArrayChange(e, 'recipients', index)}
-                                        placeholder="Recipient Address"
-                                    />
-                                    <Typography>
-                                        Recipient Share
-                                    </Typography>
-                                    <Input
-                                        type="text"
-                                        value={formData["recipient_shares"][index].toString()}
-                                        onChange={(e) => handleArrayChange(e, 'recipient_shares', index)}
-                                        placeholder="Recipient Share"
-                                    />
-                                </Stack>
-                                {index === 0 ? null :
-                                    <Button type="button" onClick={() => removeRecipient(index)} style={{ margin: "10px 0" }}>
-                                        Remove
-                                    </Button>
-                                }
-                            </Stack>
+                            <Input
+                                type="text"
+                                value={formData["recipient_shares"][index].toString()}
+                                onChange={(e) => handleArrayChange(e, 'recipient_shares', index)}
+                                placeholder="Recipient Share"
+                            />
                         </Stack>
-                    ))}
-                    <Button type="button" onClick={addRecipient} style={{ margin: "10px 0" }}>
-                        Add Recipient
-                    </Button>
-                    <Typography level="h3" style={{ marginTop: "10px" }}>
-                        Resolver
-                    </Typography>
-                    <Typography>
-                        Provide the address of the person or contract that will provide proof and trigger the payout.
-                    </Typography>
-                    <Input
-                        type="text"
-                        value={formData.oracle}
-                        onChange={(e) => handleChange(e, 'oracle')}
-                        placeholder="Oracle Address"
-                    />
-                    <br />
-                    <Checkbox
-                        label="Donate 1% of the raised amount to the protocol devs"
-                        checked={formData.payFee}
-                        onChange={togglePayFee}
-                    />
-                    <Button onClick={handleSubmit} color="primary" style={{ margin: "20px 0" }}>
-                        Deploy Event Pool Contract
-                    </Button>
-                </>
-            }
-        </Dialog>
+                        {index === 0 ? null :
+                            <Button type="button" onClick={() => removeRecipient(index)} style={{ margin: "10px 0" }}>
+                                Remove
+                            </Button>
+                        }
+                    </Stack>
+                </Stack>
+            ))}
+            <Button type="button" onClick={addRecipient} style={{ margin: "10px 0" }}>
+                Add Recipient
+            </Button>
+        </Stack>
+        <Stack flex="column" spacing={2} >
+            <Typography level="h3" style={{ marginTop: "10px" }}>
+                Resolver
+            </Typography>
+            <Typography>
+                Provide the address of the person or contract that will provide proof and trigger the payout.
+            </Typography>
+            <Input
+                type="text"
+                value={formData.oracle}
+                onChange={(e) => handleChange(e, 'oracle')}
+                placeholder="Oracle Address"
+            />
+        </Stack>
+        <Stack flex="row" spacing={2} alignItems="center">
+            <Card>
+            <Checkbox
+                sx={{ color: "yellow"}}
+                label="Donate 1% of the raised amount to the protocol devs"
+                checked={formData.payFee}
+                onChange={togglePayFee}
+            /></Card>
+        </Stack>
+        <Button onClick={handleSubmit} color="primary" style={{ margin: "20px 0" }}>
+            Deploy Event Pool Contract
+        </Button>
+    </Stack>
+
+    return (
+        <MainLayout>
+            {!isDeploying && !deployed ? Deployer : null}
+            {isDeploying ? Deploying : null}
+            {deployed ? Deployed : null}
+        </MainLayout>
     );
 };
 

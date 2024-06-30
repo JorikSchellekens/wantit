@@ -24,6 +24,8 @@ trait IWantIt<TContractState> {
     fn collect_fee(self: @TContractState) -> bool;
     // Categories this event falls under
     fn categories(self: @TContractState) -> Array<felt252>;
+    // Mint NFTs for the contributors on completion of the event
+    // fn mint_nfts(ref self: TContractState, contributers: Array<(ContractAddress, u256)>, proof: ByteArray);
     // This function 'should' return the funds in the pool to the
     // participants. However, this is likely much too expensive
     // due to the storage costs of all the participant addresses.
@@ -193,7 +195,28 @@ mod WantPool {
         i += 1;
       };
 
+
       self.completed.write(true);
     }
+
+    // fn mint_nfts(ref self: ContractState, contributers: Array<(ContractAddress, u256)>, proof: ByteArray) {
+      // Check that nfts haven't been minted before
+
+
+      // Check that the contract has been completed
+
+
+      // Verify the proof
+      // This is stubbed out for now
+      // Proof should include the following
+      //   - Users u1, ..., un have contributed funds f1, ..., fn since the start of the life of this contract
+      //   - Up to and no later than the moment this contract has been marked completed.
+
+
+      // Mint NFTs. Do we have an RNG on Starknet??
+
+      // Implement a good psuedo random RNG.
+
+    // }
   }
 }

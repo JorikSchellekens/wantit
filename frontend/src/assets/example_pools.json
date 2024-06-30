@@ -1,0 +1,134 @@
+[
+    {
+        "title": "Elon Musk to rename X AE A Xii to Greg",
+        "wish": "We all hate that name. It MUST BE CHANGED.",
+        "success_criteria": "Elon produces a tweet with a picture of an official document changing the name to Greg. The document must be verified by a reputable source.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["lol", "activism"]
+    },
+    {
+        "title": "Make all of MacOS open source",
+        "wish": "Our mission is to make the MacOS operating system fully open source, allowing developers worldwide to collaborate, innovate, and improve upon the software.",
+        "success_criteria": "The MacOS operating is made available under an MIT or similar open-source license. The source code is published on a public repository such as GitHub.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["technology", "activism"]
+    },
+    {
+        "title": "OpenAI release the weights!!",
+        "wish": "Let's unlock the power of GPT-4 for everyone!",
+        "success_criteria": "OpenAI releases the model weights for GPT-4 under an open-source license. The weights are made available on a public repository such as GitHub.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["technology", "activism"]
+    },
+    {
+        "title": "Validator 0x342992241001112311154151245 to leave the validator pool",
+        "wish": "We believe in the power of decentralization and the importance of diverse participation in blockchain validation. By encouraging Validator 0x342992241001112311154151245 to temporarily leave the validator pool, we aim to create opportunities for new validators to join and contribute to the network's security and resilience.",
+        "success_criteria": "Validator 0x342992241001112311154151245 leaves the validator pool and remains out of the validator pool for 6 months.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["technology", "activism"]
+    },
+    {
+        "title": "Cast Timothee Chalamet in Saw 11",
+        "wish": "Time for the prep boy to show us how tough he is.",
+        "success_criteria": "Timothee Chalamet is cast in Saw 11 and the movie is released.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["movies"]
+    },
+    {
+        "title": "Riely Reid and Lana Rhoades to some freaky shit",
+        "wish": "We all know what we want.",
+        "success_criteria": "Riely Reid and Lana Rhoades are cast in a movie together and the movie is released.",
+        "recipients": ["0x342992241001112311154151245", "0x342992241001112311154151245"],
+        "recipient_shares": [1, 1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["xxx"]
+    },
+    {
+        "title": "Bob Dylan to release a new album",
+        "wish": "Bob Dylan is missed by us. We would do anything to get too see his creativity unleashed once more",
+        "success_criteria": "Bob Dylan releases a new album and the album is released.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["music"]
+    },
+    {
+        "title": "Make the next iPhone with a headphone jack",
+        "wish": "We've been robbed but maybe we can pay them to make it right",
+        "success_criteria": "The iPhone 16 is released with a headphone jack.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["technology"]
+    },
+    {
+        "title": "The gorillaz to put on a concert in London 2025",
+        "wish": "The gorillaz haven't put on a concert in a while. We want to see them live. They will get paid from this pool.",
+        "success_criteria": "The gorillaz are put on a concert in London 2025.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["sports"]
+    },
+    {
+        "title": "George RR. Martin please, please, PLEASE finish your book",
+        "wish": "The show's ending was horrendous. Only you know how this plot should end. And if you don't finish it we are all narratively done for. Please finish it for God's sake. We will back you now that the hype has passed.",
+        "success_criteria": "George RR. Martin releases the last book in the series.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["books"]
+    },
+    {
+        "title": "Iggy Azalea to $mother London",
+        "wish": "Yall know you want a bit of Aussy Ass action in the UK. Concert to be held in London with our Queen Iggy as the headliner.",
+        "success_criteria": "Iggy Azalea performs at a concert in London.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["music"]
+    },
+    {
+        "title": "Bribe with ETH must be built",
+        "wish": "If you really believe that BribeWith.eth should be built, then put your sepolia eth where you mouth is.",
+        "success_criteria": "BribeWith.eth is built and the contract is deployed on mainnet.",
+        "recipients": ["0x342992241001112311154151245"],
+        "recipient_shares": [1],
+        "oracle": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "fee_address": "0x0711Fda2A2a45710d92706eC59C14091981b116b34419EF8826EaD8Ef75432BE",
+        "collect_fee": true,
+        "categories": ["technology"]
+    }
+]

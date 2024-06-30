@@ -1,16 +1,19 @@
 import React from "react";
-import { Grid, Stack, Tab, TabList, TabPanel, Tabs, ThemeProvider } from "@mui/joy";
-import EventPool from "./EventPool/EventPool";
-import Header from "./components/Header";
+import { Grid, Tab, TabList, TabPanel, Tabs, ThemeProvider } from "@mui/joy";
 import { CATEGORIES, FILTER_POOLS } from "./consts";
 import { useContractRead } from "@starknet-react/core";
 import { CONTRACT_FACTORY } from "./starknet_assets/contracts/contractFactory";
 import { BrowserRouter as Router, Route, Routes, useParams } from "react-router-dom";
-import Footer from "./components/Footer";
 import { CreatePoolCard } from "./CreatePool/CreatePoolCard";
 import { dieselpunkTheme } from "./dieselpunktheme";
 import { useMediaQuery } from "usehooks-ts";
 import { About } from "./About";
+import PoolCreator from "./CreatePool/PoolCreator";
+import { MainLayout } from "./MainLayout";
+import { EventCard } from "./EventPool/EventPoolCard";
+import { EventPool } from "./EventPool/EventPool";
+import { DeployExamples } from "./DeployExamples";
+// import { About2 } from "./About2";
 
 function App() {
   // Store the result of the fetch in a state variable
@@ -47,10 +50,9 @@ function App() {
 
     // Now map the sorted list to React components
     const eventPools = sortedContractList.reverse().map((address, index) => {
-      const isActive = address === contractAddress;
       return (
         <Grid key={index} xs={gridWidth}>
-          <EventPool contractAddress={address} isActive={isActive} />
+          <EventCard contractAddress={address} />
         </Grid>
       );
     });
@@ -117,19 +119,10 @@ function App() {
       {tabPanels}
     </Tabs>
 
-    return (
-      <Stack direction="column" spacing={2} sx={{ width: '100%', margin: 'auto', height: '100%', justifyContent: 'space-between' }}>
-        <Stack direction="column" spacing={2}>
-          <Header />
-          {tablist  }
-        </Stack>
-        <Stack direction="column" spacing={2}>
-          <Footer />
-        </Stack>
-      </Stack>
-    );
+    return <MainLayout>
+      {tablist}
+    </MainLayout>
   };
-
 
   // Add a path for category selection
   return (
@@ -138,8 +131,11 @@ function App() {
         <Routes>
           <Route path="/" element={<EventPoolRouter />} />
           <Route path="/category/:category" element={<EventPoolRouter />} />
-          <Route path="/pool/:contractAddress" element={<EventPoolRouter />} />
+          <Route path="/pool/:contractAddress" element={<EventPool />} />
           <Route path="/about" element={<About />} />
+          <Route path="/create" element={<PoolCreator />} />
+          <Route path="/deploy_examples" element={<DeployExamples />} />
+          {/* <Route path="/about2" element={<About2 />} /> */}
         </Routes>
       </Router>
     </ThemeProvider>
