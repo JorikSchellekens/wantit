@@ -3,14 +3,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract Want is ERC1155, ReentrancyGuard {
-    using SafeMath for uint256;
-    using Counters for Counters.Counter;
-
     struct Recipient {
         address addr;
         uint8 shares;
@@ -22,18 +17,19 @@ contract Want is ERC1155, ReentrancyGuard {
         uint256 nftId;
     }
 
-    Counters.Counter private _tokenIds;
+    uint256 private _tokenIds;
     uint256 public constant WANT_TOKEN_ID = 0;
 
-    string public immutable title;
-    string public immutable wish;
-    string public immutable successCriteria;
+    bytes32 public immutable title;
+    bytes32 public immutable wish;
+    bytes32 public immutable successCriteria;
     address public immutable oracle;
-    Recipient[] public immutable recipients;
     address public immutable feeAddress;
     bool public immutable collectFee;
-    string[] public immutable categories;
     uint256 public immutable expiryTimestamp;
+
+    Recipient[] public recipients;
+    string[] public categories;
 
     mapping(IERC20 => TokenInfo) public tokenInfos;
     IERC20[] public supportedTokens;
@@ -52,8 +48,7 @@ contract Want is ERC1155, ReentrancyGuard {
         string memory _title,
         string memory _wish,
         string memory _successCriteria,
-        address[] memory _recipientAddresses,
-        uint8[] memory _recipientShares,
+        Recipient[] memory _recipients,
         address _oracle,
         address _feeAddress,
         bool _collectFee,
@@ -62,37 +57,36 @@ contract Want is ERC1155, ReentrancyGuard {
         IERC20[] memory _initialSupportedTokens,
         uint256 _expiryTimestamp
     ) ERC1155(_uri) {
-        require(_recipientAddresses.length == _recipientShares.length, "Recipients and shares must match");
         require(_expiryTimestamp > block.timestamp, "Expiry must be in the future");
 
-        title = _title;
-        wish = _wish;
-        successCriteria = _successCriteria;
+        title = bytes32(bytes(_title));
+        wish = bytes32(bytes(_wish));
+        successCriteria = bytes32(bytes(_successCriteria));
         oracle = _oracle;
         feeAddress = _feeAddress;
         collectFee = _collectFee;
-        categories = _categories;
         expiryTimestamp = _expiryTimestamp;
 
-        // Initialize recipients array
-        for (uint i = 0; i < _recipientAddresses.length; i++) {
-            recipients.push(Recipient(_recipientAddresses[i], _recipientShares[i]));
-        }
+        // Directly assign recipients and categories
+        recipients = _recipients;
+        categories = _categories;
 
         // Mint a single "Want" NFT
         _mint(address(this), WANT_TOKEN_ID, 1, "");
 
         // Add initial supported tokens
-        for (uint i = 0; i < _initialSupportedTokens.length; i++) {
+        uint256 tokenLength = _initialSupportedTokens.length;
+        for (uint256 i = 0; i < tokenLength;) {
             _addSupportedToken(_initialSupportedTokens[i]);
+            unchecked { ++i; }
         }
     }
 
     function _addSupportedToken(IERC20 token) internal {
         require(address(tokenInfos[token].token) == address(0), "Token already supported");
         
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
+        _tokenIds++;
+        uint256 newTokenId = _tokenIds;
         
         tokenInfos[token] = TokenInfo({
             token: token,
@@ -119,7 +113,7 @@ contract Want is ERC1155, ReentrancyGuard {
         
         require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
-        tokenInfo.totalContributions = tokenInfo.totalContributions.add(amount);
+        tokenInfo.totalContributions += amount;
 
         // Mint contribution NFT
         _mint(msg.sender, tokenInfo.nftId, amount, "");
@@ -135,7 +129,7 @@ contract Want is ERC1155, ReentrancyGuard {
 
         uint256 totalShares = 0;
         for (uint i = 0; i < recipients.length; i++) {
-            totalShares = totalShares.add(recipients[i].shares);
+            totalShares += recipients[i].shares;
         }
 
         address[] memory tokenAddresses = new address[](supportedTokens.length);
@@ -146,15 +140,15 @@ contract Want is ERC1155, ReentrancyGuard {
             uint256 totalAmount = token.balanceOf(address(this));
 
             if (collectFee) {
-                uint256 fee = totalAmount.div(100);
+                uint256 fee = totalAmount / 100;
                 require(token.transfer(feeAddress, fee), "Fee transfer failed");
-                totalAmount = totalAmount.sub(fee);
+                totalAmount -= fee;
             }
 
             for (uint j = 0; j < recipients.length; j++) {
-                uint256 amount = totalAmount.mul(recipients[j].shares).div(totalShares);
+                uint256 amount = totalAmount * recipients[j].shares / totalShares;
                 require(token.transfer(recipients[j].addr, amount), "Recipient transfer failed");
-                payoutAmounts[i] = payoutAmounts[i].add(amount);
+                payoutAmounts[i] += amount;
             }
 
             tokenAddresses[i] = address(token);
@@ -194,7 +188,7 @@ contract Want is ERC1155, ReentrancyGuard {
     }
 
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
-        require(tokenId <= _tokenIds.current(), "URI query for nonexistent token");
+        require(tokenId <= _tokenIds, "URI query for nonexistent token");
         // Return a URI that includes the token ID and contribution amount
         // You would need to implement a proper metadata server to handle these URIs
         return string(abi.encodePacked(super.uri(tokenId), "/", _uint2str(tokenId)));
@@ -216,7 +210,7 @@ contract Want is ERC1155, ReentrancyGuard {
             j /= 10;
         }
         str = string(bstr);
-    }
+    } 
 
     function getRecipients() external view returns (Recipient[] memory) {
         return recipients;
