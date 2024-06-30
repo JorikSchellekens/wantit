@@ -59,7 +59,7 @@ contract WantFactory {
         );
     }
 
-    function getDeployedWants(uint256 startSalt, uint256 endSalt) external view returns (address[] memory) {
+    function getDeployedWants(uint256 startSalt, uint256 endSalt) public view returns (address[] memory) {
         require(endSalt >= startSalt, "Invalid salt range");
         require(endSalt <= currentSalt, "End salt out of range");
 
@@ -71,4 +71,9 @@ contract WantFactory {
 
         return deployedWants;
     }
+
+    function getAllDeployedWants() external view returns (address[] memory) {
+        return getDeployedWants(0, currentSalt);
+    }
+
 }
