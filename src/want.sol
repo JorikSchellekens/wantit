@@ -13,6 +13,7 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable {
     }
 
     struct TokenInfo {
+        IERC20 token;
         uint256 totalContributions;
         uint256 nftId;
     }
