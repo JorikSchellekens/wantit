@@ -2,10 +2,11 @@ import React from 'react'
 import { Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { coinbaseMono } from '@/app/layout'
 
 export default function NavBar() {
   return (
-    <nav className="relative flex items-center justify-between p-4 bg-background bg-opacity-80">
+    <nav className={`relative flex items-center justify-between p-4 bg-black bg-opacity-80 ${coinbaseMono.variable} font-mono`}>
       <h1 className="text-2xl font-bold text-text">WantIt</h1>
       <div className="flex items-center space-x-4">
         <Button variant="ghost" className="text-text hover:text-secondary">Home</Button>

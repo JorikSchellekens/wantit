@@ -15,6 +15,7 @@
   --color-secondary: #ffed4a;
   --color-accent: var(--color-lilac);
   --color-highlight: var(--color-mimi-pink);
+  --color-danger: #e3342f;
 }
 
 body {

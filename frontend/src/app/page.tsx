@@ -45,7 +45,7 @@ export default function ProductPage() {
     }
   ]
   return (
-    <div className={`min-h-screen bg-background text-text ${coinbaseMono.variable} ${coinbaseSans.variable}`}>
+    <div className={`min-h-screen bg-[#020817] text-white ${coinbaseMono.variable} font-mono`}>
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(10)].map((_, i) => (
           <div

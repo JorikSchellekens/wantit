@@ -9,7 +9,7 @@ interface InputProps {
 
 const Input: React.FC<InputProps> = ({ type, placeholder, className }) => {
   return (
-    <input type={type} placeholder={placeholder} className={`px-3 py-2 ${className} ${coinbaseMono.variable}`} />
+    <input type={type} placeholder={placeholder} className={`px-3 py-2 ${className} ${coinbaseMono.variable} font-mono`} />
   );
 };
 

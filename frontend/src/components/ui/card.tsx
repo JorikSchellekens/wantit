@@ -8,7 +8,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ className, children }) => {
   return (
-    <div className={`p-4 shadow ${className} ${coinbaseMono.variable}`}>
+    <div className={`p-4 shadow ${className} ${coinbaseMono.variable} font-mono`}>
       {children}
     </div>
   );
@@ -21,7 +21,7 @@ interface CardContentProps {
 
 const CardContent: React.FC<CardContentProps> = ({ className, children }) => {
   return (
-    <div className={`p-4 ${className} ${coinbaseMono.variable}`}>
+    <div className={`p-4 ${className} ${coinbaseMono.variable} font-mono`}>
       {children}
     </div>
   );
