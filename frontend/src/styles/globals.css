@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-risd-blue: #2151F5;
+  --color-black: #000000;
+  --color-ash-gray: #C9CEBD;
+  --color-lilac: #C297B8;
+  --color-mimi-pink: #FDCFF3;
+  
+  --color-background: var(--color-black);
+  --color-text: #FFFFFF;
+  --color-primary: var(--color-risd-blue);
+  --color-secondary: var(--color-ash-gray);
+  --color-accent: var(--color-lilac);
+  --color-highlight: var(--color-mimi-pink);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}

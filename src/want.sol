@@ -154,7 +154,7 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable, 
             uint256 totalAmount = token.balanceOf(address(this));
 
             if (collectFee) {
-                uint256 fee = totalAmount / 100;
+                uint256 fee = totalAmount / 1000;
                 require(token.transfer(feeAddress, fee), "Fee transfer failed");
                 totalAmount -= fee;
             }
