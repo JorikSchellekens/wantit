@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'burgues-script': ['var(--font-burgues-script)'],
+        'coinbase-mono': ['var(--font-coinbase-mono)'],
+        'coinbase-sans': ['var(--font-coinbase-sans)'],
+      },
       colors: {
         'risd-blue': '#2151F5',
         'black': '#000000',

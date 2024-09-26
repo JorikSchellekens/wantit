@@ -1,13 +1,11 @@
 import React from 'react'
 import { Button } from "@/components/ui/button"
-import { coinbaseMono } from '@/app/layout'
 
 export default function HeroSection() {
   return (
-    <div className={`text-center mb-16 ${coinbaseMono.variable} font-mono`}>
+    <div className={`text-center mb-16`}>
       <h2 className="text-5xl font-bold mb-4">EVERYTHING YOU NEED TO</h2>
-      <h2 className="text-5xl font-bold mb-8">CHANGE THE WORLD</h2>
-      <Button size="lg" className="bg-blue-600 hover:bg-blue-700 rounded-none font-mono">GET STARTED</Button>
+      <h2 className={`text-5xl mb-8 font-burgues-script`}>Change  the  World</h2>
     </div>
   )
 }

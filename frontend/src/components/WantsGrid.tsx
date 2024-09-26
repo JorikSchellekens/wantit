@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { coinbaseMono } from '@/app/layout'
 
