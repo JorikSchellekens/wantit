@@ -11,8 +11,8 @@
   
   --color-background: var(--color-black);
   --color-text: #FFFFFF;
-  --color-primary: var(--color-risd-blue);
-  --color-secondary: var(--color-ash-gray);
+  --color-primary: #3490dc;
+  --color-secondary: #ffed4a;
   --color-accent: var(--color-lilac);
   --color-highlight: var(--color-mimi-pink);
 }

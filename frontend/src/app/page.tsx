@@ -45,12 +45,12 @@ export default function ProductPage() {
     }
   ]
   return (
-    <div className={`min-h-screen bg-[#020817] text-white ${coinbaseMono.variable} ${coinbaseSans.variable}`}>
+    <div className={`min-h-screen bg-background text-text ${coinbaseMono.variable} ${coinbaseSans.variable}`}>
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
-            className="absolute bg-blue-500 opacity-40"
+            className="absolute bg-primary opacity-40"
             style={{
               width: `${Math.random() * 30 + 10}%`,
               height: `${Math.random() * 30 + 10}%`,
