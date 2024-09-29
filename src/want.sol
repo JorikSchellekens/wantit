@@ -90,7 +90,7 @@ contract Want is Initializable, ERC1155Upgradeable, ReentrancyGuardUpgradeable, 
 }
 
     function _addSupportedToken(IERC20 token) internal {
-        require(tokenInfos[token].nftId != 0, "Token already supported");
+        require(tokenInfos[token].nftId == 0, "Token already supported");
         
         _tokenIds++;
         uint256 newTokenId = _tokenIds;
