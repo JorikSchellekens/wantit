@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import NewWantPoolFAB from './CreateWantButton'
+import CreateWantButton from './CreateWantButton'
 import CreateWantModal from './CreateWantModal'
 
 const CreateWantButtonWrapper: React.FC = () => {
@@ -12,7 +12,7 @@ const CreateWantButtonWrapper: React.FC = () => {
 
   return (
     <>
-      <NewWantPoolFAB onClick={handleOpenModal} />
+      <CreateWantButton onClick={handleOpenModal} />
       {isModalOpen && <CreateWantModal onClose={handleCloseModal} />}
     </>
   )

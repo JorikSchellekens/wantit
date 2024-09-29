@@ -1,5 +1,4 @@
 import React from 'react';
-import { coinbaseMono } from '@/app/layout'
 
 interface InputProps {
   type: string;
@@ -9,7 +8,7 @@ interface InputProps {
 
 const Input: React.FC<InputProps> = ({ type, placeholder, className }) => {
   return (
-    <input type={type} placeholder={placeholder} className={`px-3 py-2 ${className} ${coinbaseMono.variable} font-mono`} />
+    <input type={type} placeholder={placeholder} className={`px-3 py-2 ${className} coinbase-mono font-mono`} />
   );
 };
 

@@ -1,11 +1,12 @@
 import React from 'react';
-import { coinbaseMono } from '@/app/layout';
 
 interface ButtonProps {
   variant?: 'default' | 'ghost';
   size?: 'lg';
   className?: string;
   children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({ variant = 'default', size, className, children }) => {
@@ -14,7 +15,7 @@ const Button: React.FC<ButtonProps> = ({ variant = 'default', size, className, c
   const sizeClasses = size === 'lg' ? 'text-lg' : '';
 
   return (
-    <button className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className} ${coinbaseMono.variable}`}>
+    <button className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className} coinbase-mono font-mono`}>
       {children}
     </button>
   );

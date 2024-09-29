@@ -1,5 +1,4 @@
 import React from 'react'
-import { coinbaseMono } from '@/app/layout'
 import CategoryFilter from './CategoryFilter'
 
 export interface WantPool {
@@ -17,7 +16,7 @@ const WantsGrid: React.FC<WantsGridProps> = ({ wantPools }) => {
   const allCategories = Array.from(new Set(wantPools.flatMap(pool => pool.categories)));
 
   return (
-    <section className={`${coinbaseMono.variable} font-mono`}>
+    <section className={`coinbase-mono font-mono`}>
       <h3 className="text-3xl font-bold mb-8 text-text">All Want Pools</h3>
       
       <CategoryFilter 

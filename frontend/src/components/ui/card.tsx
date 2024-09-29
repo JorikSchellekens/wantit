@@ -1,5 +1,4 @@
 import React from 'react';
-import { coinbaseMono } from '@/app/layout';
 
 interface CardProps {
   className?: string;
@@ -8,7 +7,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ className, children }) => {
   return (
-    <div className={`p-4 shadow ${className} ${coinbaseMono.variable} font-mono`}>
+    <div className={`p-4 shadow ${className} coinbase-mono font-mono`}>
       {children}
     </div>
   );
@@ -21,7 +20,7 @@ interface CardContentProps {
 
 const CardContent: React.FC<CardContentProps> = ({ className, children }) => {
   return (
-    <div className={`p-4 ${className} ${coinbaseMono.variable} font-mono`}>
+    <div className={`p-4 ${className} coinbase-mono font-mono`}>
       {children}
     </div>
   );

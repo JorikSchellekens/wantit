@@ -1,5 +1,4 @@
 import React from 'react'
-import { coinbaseMono, coinbaseSans } from '@/app/layout'
 import NavBar from '@/components/NavBar'
 import HeroSection from '@/components/HeroSection'
 import PopularWants from '@/components/PopularWants'
@@ -46,7 +45,7 @@ export default function ProductPage() {
     }
   ]
   return (
-    <div className={`min-h-screen bg-[#020817] text-white ${coinbaseMono.variable} font-mono`}>
+    <div className={`min-h-screen bg-[#020817] text-white coinbase-mono font-mono`}>
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(10)].map((_, i) => (
           <div

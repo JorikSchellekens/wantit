@@ -1,7 +1,10 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { ethers } from 'ethers'
+import { useAccount, useWriteContract } from 'wagmi'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { toast } from 'react-toastify'
+import { WANT_FACTORY_ADDRESS, WANT_FACTORY_ABI } from '../constants/contractInfo'
 
 interface CreateWantModalProps {
   onClose: () => void
@@ -24,6 +27,9 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
   const [uri, setUri] = useState('')
   const [initialSupportedTokens, setInitialSupportedTokens] = useState<string[]>([''])
   const [expiryTimestamp, setExpiryTimestamp] = useState('')
+
+  const { address, chain } = useAccount()
+  const { openConnectModal } = useConnectModal()
 
   const handleAddRecipient = () => {
     setRecipients([...recipients, { address: '', percentage: 0 }])
@@ -74,24 +80,64 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
     setInitialSupportedTokens(newTokens)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { writeContract, isLoading, isSuccess, error } = useWriteContract()
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement the logic to create a new Want using the WantFactory contract
-    console.log({
-      title,
-      wish,
-      successCriteria,
-      recipients,
-      oracle,
-      feeAddress,
-      collectFee,
-      categories,
-      uri,
-      initialSupportedTokens,
-      expiryTimestamp
-    })
-    onClose()
+    
+    if (!address) {
+      openConnectModal?.()
+      return
+    }
+
+    if (!chain) {
+      toast.error('Wallet not connected')
+      return
+    }
+
+    const totalPercentage = recipients.reduce((sum, r) => sum + r.percentage, 0)
+    if (totalPercentage !== 100) {
+      toast.error('Total percentage must be 100%')
+      return
+    }
+
+    try {
+      await writeContract({
+        address: WANT_FACTORY_ADDRESS,
+        abi: WANT_FACTORY_ABI,
+        functionName: 'createWant',
+        args: [
+          title,
+          wish,
+          successCriteria,
+          recipients.map(r => ({ addr: r.address, shares: r.percentage })),
+          oracle,
+          feeAddress,
+          collectFee,
+          categories,
+          uri,
+          initialSupportedTokens,
+          Math.floor(new Date(expiryTimestamp).getTime() / 1000)
+        ],
+      })
+    } catch (err) {
+      console.error('Error creating Want:', err)
+      toast.error('Error creating Want. Please try again.')
+    }
   }
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success('Want created successfully!')
+      onClose()
+    }
+  }, [isSuccess, onClose])
+
+  useEffect(() => {
+    if (error) {
+      toast.error(`Error: ${error.message}`)
+    }
+  }, [error])
 
   const modalRef = useRef<HTMLDivElement>(null)
 
