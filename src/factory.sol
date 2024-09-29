@@ -72,6 +72,10 @@ contract WantFactory {
         return deployedWants;
     }
 
+    function getDeployedWantsFrom(uint256 startSalt) external view returns (address[] memory) {
+        return getDeployedWants(startSalt, currentSalt);
+    }
+
     function getAllDeployedWants() external view returns (address[] memory) {
         return getDeployedWants(0, currentSalt);
     }
