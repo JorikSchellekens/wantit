@@ -4,6 +4,7 @@ import NavBar from '@/components/NavBar'
 import HeroSection from '@/components/HeroSection'
 import PopularWants from '@/components/PopularWants'
 import WantsGrid from '@/components/WantsGrid'
+import CreateWantButtonWrapper from '@/components/CreateWantButtonWrapper'
 
 export default function ProductPage() {
   const wantPools: Array<{title:string, wish:string, categories:string[], popular:boolean}> = [
@@ -69,6 +70,7 @@ export default function ProductPage() {
         <PopularWants wantPools={wantPools} />
         <WantsGrid wantPools={wantPools} />
       </main>
+      <CreateWantButtonWrapper />
     </div>
   )
 }
