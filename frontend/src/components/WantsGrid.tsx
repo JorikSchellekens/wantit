@@ -1,11 +1,16 @@
 import React from 'react'
 import CategoryFilter from './CategoryFilter'
+import { Address } from 'viem';
 
 export interface WantPool {
   title: string;
   wish: string;
   categories: string[];
   popular: boolean;
+  expiryTimestamp: number;
+  supportedTokens: string[]; // Array of token symbols
+  status: 'PENDING' | 'EXPIRED' | 'PASSED';
+  contractAddress: Address;
 }
 
 interface WantsGridProps {

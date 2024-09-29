@@ -1,6 +1,5 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { base, baseSepolia } from 'wagmi/chains'
-import { coinbaseWallet, walletConnect } from 'wagmi/connectors'
 
 export const config = getDefaultConfig({
   appName: 'Wantit',

@@ -5,14 +5,13 @@ import { Search } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useConnectModal, useAccountModal } from "@rainbow-me/rainbowkit";
-import { useAccount, useDisconnect, useConnect } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 
 export default function NavBar() {
   const { openConnectModal } = useConnectModal();
   const { openAccountModal } = useAccountModal();
   const { isConnecting, isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
-  const { connect, connectors } = useConnect();
 
   useEffect(() => {
     console.log("isConnected", isConnected);

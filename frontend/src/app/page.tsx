@@ -1,47 +1,72 @@
+'use client'
 import React from 'react'
 import NavBar from '@/components/NavBar'
 import HeroSection from '@/components/HeroSection'
 import PopularWants from '@/components/PopularWants'
-import WantsGrid from '@/components/WantsGrid'
+import WantsGrid, { WantPool } from '@/components/WantsGrid'
 import CreateWantButtonWrapper from '@/components/CreateWantButtonWrapper'
 
 export default function ProductPage() {
-  const wantPools: Array<{title:string, wish:string, categories:string[], popular:boolean}> = [
+  const wantPools: Array<WantPool> = [
     {
       title: "New Laptop for Students",
       wish: "Provide laptops to underprivileged students",
       categories: ["Education", "Technology"],
       popular: true,
+      expiryTimestamp: 172800000,
+      supportedTokens: ["ETH", "USDT", "USDC"],
+      status: "PENDING",
+      contractAddress: "0x0",
     },
     {
       title: "Clean Water Initiative",
       wish: "Provide clean water to rural communities",
       categories: ["Health", "Environment"],
       popular: true,
+      expiryTimestamp: 172800000,
+      supportedTokens: ["ETH", "USDT", "USDC"],
+      status: "PENDING",
+      contractAddress: "0x0",
     },
     {
       title: "Coding Bootcamp Scholarships",
       wish: "Fund coding education for underrepresented groups",
       categories: ["Education", "Technology"],
       popular: true,
+      expiryTimestamp: 172800000,
+      supportedTokens: ["ETH", "USDT", "USDC"],
+      status: "PENDING",
+      contractAddress: "0x0",
     },
     {
       title: "Coding Bootcamp Scholarships2",
       wish: "Fund coding education for underrepresented groups",
       categories: ["Education", "Technology"],
       popular: false,
+      expiryTimestamp: 172800000,
+      supportedTokens: ["ETH", "USDT", "USDC"],
+      status: "PENDING",
+      contractAddress: "0x0",
     },
     {
       title: "Coding Bootcamp Scholarships3",
       wish: "Fund coding education for underrepresented groups",
       categories: ["Education", "Technology"],
       popular: false,
+      expiryTimestamp: 172800000,
+      supportedTokens: ["ETH", "USDT", "USDC"],
+      status: "PENDING",
+      contractAddress: "0x0",
     },
     {
       title: "Coding Bootcamp Scholarships4",
       wish: "Fund coding education for underrepresented groups",
       categories: ["Education", "Technology"],
       popular: false,
+      expiryTimestamp: 172800000,
+      supportedTokens: ["ETH", "USDT", "USDC"],
+      status: "PENDING",
+      contractAddress: "0x0",
     }
   ]
   return (

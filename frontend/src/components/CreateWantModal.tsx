@@ -80,7 +80,7 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
     setInitialSupportedTokens(newTokens)
   }
 
-  const { writeContract, isLoading, isSuccess, error } = useWriteContract()
+  const { writeContract, isSuccess, error } = useWriteContract()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

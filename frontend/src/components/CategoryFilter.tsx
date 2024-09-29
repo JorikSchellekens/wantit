@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { WantPool } from './WantsGrid';
+import WantCard from './WantCard';
 
 interface CategoryFilterProps {
   allCategories: string[];
@@ -45,17 +46,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ allCategories, wantPool
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredWantPools.map((pool, index) => (
-          <div key={index} className="bg-background bg-opacity-70 border-none rounded-none p-6">
-            <h4 className="text-xl font-semibold mb-2 text-primary">{pool.title}</h4>
-            <p className="mb-4">{pool.wish}</p>
-            <div className="flex flex-wrap gap-2">
-              {pool.categories.map((cat) => (
-                <span key={cat} className="text-xs bg-accent text-background px-2 py-1 rounded-none">
-                  {cat}
-                </span>
-              ))}
-            </div>
-          </div>
+          <WantCard key={index} pool={pool} />
         ))}
       </div>
     </>

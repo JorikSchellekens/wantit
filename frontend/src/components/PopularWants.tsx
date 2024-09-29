@@ -1,12 +1,7 @@
+'use client'
 import React from 'react'
-import { Card, CardContent } from "@/components/ui/card"
-
-interface WantPool {
-  title: string;
-  wish: string;
-  categories: string[];
-  popular: boolean;
-}
+import { WantPool } from './WantsGrid'
+import WantCard from './WantCard'
 
 interface WantPoolsSectionProps {
   wantPools: WantPool[];
@@ -20,19 +15,7 @@ const PopularWants: React.FC<WantPoolsSectionProps> = ({ wantPools }) => {
       <h3 className="text-3xl font-bold mb-8 text-text">Popular Want Pools</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {popularWants.map((pool, index) => (
-          <Card key={index} className="bg-background bg-opacity-70 border-none rounded-none">
-            <CardContent className="p-6">
-              <h4 className="text-xl font-semibold mb-2 text-primary">{pool.title}</h4>
-              <p className="mb-4">{pool.wish}</p>
-              <div className="flex flex-wrap gap-2">
-                {pool.categories.map((cat) => (
-                  <span key={cat} className="text-xs bg-accent text-background px-2 py-1 rounded-none">
-                    {cat}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <WantCard key={index} pool={pool} />
         ))}
       </div>
     </section>
