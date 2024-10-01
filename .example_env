@@ -1,3 +1,5 @@
 export STARKNET_NETWORK="sepolia"
 export STARKNET_KEYSTORE="~/.starkli/keystore"
 export STARKENT_ACCOUNT="~/.starkli/sepolia_accounts"
+# private key for the account you want to use in forge
+export PRIVATE_KEY=
