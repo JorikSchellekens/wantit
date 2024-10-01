@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useAccount, useWriteContract } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { toast } from 'react-toastify'
-import { WANT_FACTORY_ADDRESS, WANT_FACTORY_ABI } from '../constants/contractInfo'
+import { WANT_FACTORY_ADDRESS, WANT_FACTORY_ABI } from '@/constants/contractInfo'
 
 interface CreateWantModalProps {
   onClose: () => void

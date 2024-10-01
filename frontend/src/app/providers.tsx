@@ -2,7 +2,8 @@ import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { config } from "./config";
+import { WantsContextProvider } from "@/app/contexts/wantsContext";
+import { config } from "@/app/config";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +25,9 @@ export default function Providers({ children }: Props) {
           })}
           modalSize="compact"
         >
-          {children}
+          <WantsContextProvider>
+            {children}
+          </WantsContextProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

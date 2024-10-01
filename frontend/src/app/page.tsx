@@ -2,73 +2,13 @@
 import React from 'react'
 import NavBar from '@/components/NavBar'
 import HeroSection from '@/components/HeroSection'
-import PopularWants from '@/components/PopularWants'
-import WantsGrid, { WantPool } from '@/components/WantsGrid'
 import CreateWantButtonWrapper from '@/components/CreateWantButtonWrapper'
+import dynamic from 'next/dynamic'
+
+const WantsGrid = dynamic(() => import('@/components/WantsGrid'), { ssr: false })
+const PopularWants = dynamic(() => import('@/components/PopularWants'), { ssr: false })
 
 export default function ProductPage() {
-  const wantPools: Array<WantPool> = [
-    {
-      title: "New Laptop for Students",
-      wish: "Provide laptops to underprivileged students",
-      categories: ["Education", "Technology"],
-      popular: true,
-      expiryTimestamp: 172800000,
-      supportedTokens: ["ETH", "USDT", "USDC"],
-      status: "PENDING",
-      contractAddress: "0x0",
-    },
-    {
-      title: "Clean Water Initiative",
-      wish: "Provide clean water to rural communities",
-      categories: ["Health", "Environment"],
-      popular: true,
-      expiryTimestamp: 172800000,
-      supportedTokens: ["ETH", "USDT", "USDC"],
-      status: "PENDING",
-      contractAddress: "0x0",
-    },
-    {
-      title: "Coding Bootcamp Scholarships",
-      wish: "Fund coding education for underrepresented groups",
-      categories: ["Education", "Technology"],
-      popular: true,
-      expiryTimestamp: 172800000,
-      supportedTokens: ["ETH", "USDT", "USDC"],
-      status: "PENDING",
-      contractAddress: "0x0",
-    },
-    {
-      title: "Coding Bootcamp Scholarships2",
-      wish: "Fund coding education for underrepresented groups",
-      categories: ["Education", "Technology"],
-      popular: false,
-      expiryTimestamp: 172800000,
-      supportedTokens: ["ETH", "USDT", "USDC"],
-      status: "PENDING",
-      contractAddress: "0x0",
-    },
-    {
-      title: "Coding Bootcamp Scholarships3",
-      wish: "Fund coding education for underrepresented groups",
-      categories: ["Education", "Technology"],
-      popular: false,
-      expiryTimestamp: 172800000,
-      supportedTokens: ["ETH", "USDT", "USDC"],
-      status: "PENDING",
-      contractAddress: "0x0",
-    },
-    {
-      title: "Coding Bootcamp Scholarships4",
-      wish: "Fund coding education for underrepresented groups",
-      categories: ["Education", "Technology"],
-      popular: false,
-      expiryTimestamp: 172800000,
-      supportedTokens: ["ETH", "USDT", "USDC"],
-      status: "PENDING",
-      contractAddress: "0x0",
-    }
-  ]
   return (
     <div className={`min-h-screen bg-[#020817] text-white coinbase-mono font-mono`}>
       <div className="absolute inset-0 overflow-hidden">
@@ -91,8 +31,8 @@ export default function ProductPage() {
       <NavBar />
       <main className="relative container mx-auto px-4 py-16">
         <HeroSection />
-        <PopularWants wantPools={wantPools} />
-        <WantsGrid wantPools={wantPools} />
+        <PopularWants />
+        <WantsGrid />
       </main>
       <CreateWantButtonWrapper />
     </div>

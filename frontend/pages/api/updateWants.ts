@@ -12,7 +12,7 @@ enum UpdateOrMerge {
   MERGE = 'MERGE'
 }
 
-type WantsSchema = {
+export type WantsSchema = {
   wants: {
     [chainId: number]: {
         salt: number
@@ -105,7 +105,8 @@ export default async function handler(
   };
   const data = await db.query(query);
   console.log(JSON.stringify(data, null, 2))
-  const [salt, updateOrMerge] = [data?.wantit[0]?.[baseSepolia.id]?.salt, UpdateOrMerge.MERGE] || [0, UpdateOrMerge.UPDATE];
+  const saltRead = data?.wantit[0]?.[baseSepolia.id]?.salt
+  const [salt, updateOrMerge] = saltRead ? [saltRead, UpdateOrMerge.MERGE] : [0, UpdateOrMerge.UPDATE];
   console.log({salt})
 
   // 2. Get Wants from RPC
@@ -171,6 +172,8 @@ export default async function handler(
     const isAppropriate = await isContentAppropriate(contentToCheck);
     if (isAppropriate) {
       filteredWants[wantAddress as keyof typeof wantsData] = want;
+    } else {
+      console.log(`Filtered out want: ${JSON.stringify(want, null, 2)}`);
     }
   }));
 

@@ -1,18 +1,18 @@
 'use client'
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { WantPool } from './WantsGrid';
 import { WANT_ABI } from '@/constants/contractInfo';
 import { useWriteContract } from 'wagmi';
-import { parseEther } from 'viem';
-
+import { parseEther, Address } from 'viem';
+import { WantPool } from '@/app/contexts/wantsContext'
 interface WantDetailsModalProps {
+  contractAddress: Address
   isOpen: boolean;
   onClose: () => void;
-  want: WantPool;
+  want: WantPool[Address];
 }
 
-const WantDetailsModal: React.FC<WantDetailsModalProps> = ({ isOpen, onClose, want }) => {
+const WantDetailsModal: React.FC<WantDetailsModalProps> = ({ contractAddress, isOpen, onClose, want }) => {
   const [contributionAmount, setContributionAmount] = useState('');
   const [selectedToken, setSelectedToken] = useState(want.supportedTokens[0]);
 
@@ -22,12 +22,12 @@ const WantDetailsModal: React.FC<WantDetailsModalProps> = ({ isOpen, onClose, wa
     e.stopPropagation(); // Stop event propagation
     console.log("contribute called");
     try {
-    writeContract({
-      address: '0x14E7f0920Be48adc30A94E6C6BAB5faA392470FB',
-      abi: WANT_ABI,
-          functionName: 'contribute',
-          args: ['0x5dEaC602762362FE5f135FA5904351916053cF70', parseEther(contributionAmount || '0')],
-    });
+      writeContract({
+        address: contractAddress,
+        abi: WANT_ABI,
+        functionName: 'contribute',
+        args: [selectedToken, parseEther(contributionAmount || '0')],
+      });
     } catch (error) {
       console.error('Contribution failed:', error);
     }
@@ -63,11 +63,11 @@ const WantDetailsModal: React.FC<WantDetailsModalProps> = ({ isOpen, onClose, wa
             <h3 className="text-lg font-semibold mb-2">Contribute</h3>
             <select
               value={selectedToken}
-              onChange={(e) => setSelectedToken(e.target.value)}
+              onChange={(e) => setSelectedToken(e.target.value as Address)}
               className="w-full p-2 mb-2 bg-background border border-accent text-text"
               onClick={e => e.stopPropagation()} // Stop propagation on select
             >
-              {want.supportedTokens.map((token) => (
+              {want.supportedTokens.map((token: Address) => (
                 <option key={token} value={token}>{token}</option>
               ))}
             </select>
