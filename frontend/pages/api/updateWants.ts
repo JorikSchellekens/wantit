@@ -7,6 +7,11 @@ import OpenAI from 'openai'
 
 const RPC_URL = 'https://rpc.ankr.com/base_sepolia'
 
+enum UpdateOrMerge {
+  UPDATE = 'UPDATE',
+  MERGE = 'MERGE'
+}
+
 type WantsSchema = {
   wants: {
     [chainId: number]: {
@@ -18,7 +23,7 @@ type WantsSchema = {
           oracle: Address,
           feeAddress: Address,
           collectFee: boolean,
-          expiryTimestamp: bigint,
+          expiryTimestamp: number,
           status: string,
           recipients: Array<{ addr: Address, shares: number }>,
           categories: string[],
@@ -100,7 +105,7 @@ export default async function handler(
   };
   const data = await db.query(query);
   console.log(JSON.stringify(data, null, 2))
-  const salt = data?.wantit[0]?.[baseSepolia.id]?.salt || 0;
+  const [salt, updateOrMerge] = [data?.wantit[0]?.[baseSepolia.id]?.salt, UpdateOrMerge.MERGE] || [0, UpdateOrMerge.UPDATE];
   console.log({salt})
 
   // 2. Get Wants from RPC
@@ -149,7 +154,7 @@ export default async function handler(
       oracle,
       feeAddress,
       collectFee,
-      expiryTimestamp,
+      expiryTimestamp: Number(expiryTimestamp),
       status: status.toString(),
       recipients: Array.from([{addr: recipients[0], shares: recipients[1]} as {addr: Address, shares: number}]),
       categories: categories.split(','),
@@ -182,20 +187,19 @@ export default async function handler(
   }
 
   // 4. Update Wants in DB
+  const txPayload = {
+    [baseSepolia.id]: {
+salt: Number(salt) + numWants,
+      ...filteredWants,
+    }
+  }
+  console.log("txPayload", txPayload)
   try {
-    console.log("asdfasdf", {
-      [baseSepolia.id]: {
-      salt: Number(salt) + numWants,
-      ...filteredWants,
-      }
-    })
-    const transactions = tx.wantit["00000000-0000-0000-0000-000000000000"].update({
-      [baseSepolia.id]: {
-      salt: Number(salt) + numWants,
-      ...filteredWants,
-      }
-    });
-    await db.transact(transactions);
+    
+    const transaction = updateOrMerge === UpdateOrMerge.UPDATE ?
+      tx.wantit["00000000-0000-0000-0000-000000000000"].update(txPayload) :
+      tx.wantit["00000000-0000-0000-0000-000000000000"].merge(txPayload);
+    await db.transact(transaction);
 
     console.log('Successfully updated Wants in DB');
   } catch (error) {
@@ -206,11 +210,6 @@ export default async function handler(
   }
 
   res.status(200).json({
-      wants: {
-        [baseSepolia.id]: {
-          salt: Number(salt) + numWants,
-        ...filteredWants,
-        }
-    }
+      wants: txPayload
   });
 }
