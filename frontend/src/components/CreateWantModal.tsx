@@ -110,14 +110,14 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
           title,
           wish,
           successCriteria,
-          recipients.map(r => ({ addr: r.address, shares: r.percentage })),
-          oracle,
-          feeAddress,
+          recipients.map(r => ({ addr: r.address as `0x${string}`, shares: r.percentage })),
+          oracle as `0x${string}`,
+          feeAddress as `0x${string}`,
           collectFee,
           categories,
           uri,
-          initialSupportedTokens,
-          Math.floor(new Date(expiryTimestamp).getTime() / 1000)
+          initialSupportedTokens.map(t => t as `0x${string}`),
+          BigInt(Math.floor(new Date(expiryTimestamp).getTime() / 1000))
         ],
       })
     } catch (err) {
