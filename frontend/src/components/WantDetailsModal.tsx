@@ -35,7 +35,7 @@ const WantDetailsModal: React.FC<WantDetailsModalProps> = ({ isOpen, onClose, wa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-background text-text border-none rounded-none" onClick={e => e.stopPropagation()}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold text-primary">{want.title}</DialogTitle>
         </DialogHeader>
