@@ -2,13 +2,14 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { createPublicClient, http, getContract, Address } from 'viem'
 import { baseSepolia } from 'viem/chains'
 import { WANT_FACTORY_ADDRESS, WANT_ABI, WANT_FACTORY_ABI } from '@/constants/contractInfo'
-import { init, tx, id} from '@instantdb/admin'
+import { init, tx} from '@instantdb/admin'
 import OpenAI from 'openai'
 
 const RPC_URL = 'https://rpc.ankr.com/base_sepolia'
 
 type WantsSchema = {
   wants: {
+    [chainId: number]: {
         salt: number
         [contractAddress: Address]: {
           title: string,
@@ -23,6 +24,7 @@ type WantsSchema = {
           categories: string[],
           supportedTokens: Address[]
         }
+      }
 }}
 
 const openai = new OpenAI({
@@ -62,8 +64,10 @@ export default async function handler(
   if (req.method !== 'GET') {
     res.status(405).json({
         wants: {
+          [baseSepolia.id]: {
           salt: 0,
         }
+      }
     })
   }
 
@@ -88,24 +92,22 @@ export default async function handler(
 
   // 1. Read salt from DB
   const query = {
-    wants: {
-      [baseSepolia.id]: {
+    wantit: {
         $: {
           limit: 1
         }
       }
-    }
   };
   const data = await db.query(query);
   console.log(JSON.stringify(data, null, 2))
-  const salt = data?.wants?.[baseSepolia.id]?.salt || 0;
+  const salt = data?.wantit[0]?.[baseSepolia.id]?.salt || 0;
   console.log({salt})
 
   // 2. Get Wants from RPC
   const wants: Address[] = Array.from(await wantFactory.read.getDeployedWantsFrom([BigInt(salt)]));
   console.log({wants});
 
-  const wantsData: Omit<WantsSchema['wants'], 'salt'> = {};
+  const wantsData: Omit<WantsSchema['wants'][number], 'salt'> = {};
   
   await Promise.all(wants.map(async (want) => {
     const wantContract = getContract({
@@ -140,8 +142,7 @@ export default async function handler(
       wantContract.read.supportedTokens([BigInt(0)])
     ]);
 
-    //@ts-ignore
-    wantsData[want.toString()] = {
+    wantsData[want] = {
       title,
       wish,
       successCriteria,
@@ -159,39 +160,40 @@ export default async function handler(
   const numWants = wants.length;
 
   // 3. Filter out wants based on ChatGPT's rules
-  const filteredWants = await Promise.all(Object.entries(wantsData).map(async ([_, want]) => {
-    //@ts-ignore
+  const filteredWants: Omit<WantsSchema['wants'][number], 'salt'> = {};
+  await Promise.all(Object.entries(wantsData).map(async ([wantAddress, want]): Promise<void> => {
     const contentToCheck = `Title: ${want.title}\nWish: ${want.wish}\nSuccess Criteria: ${want.successCriteria}\nCategories: ${want.categories.join(', ')}`;
     const isAppropriate = await isContentAppropriate(contentToCheck);
-    return isAppropriate ? want : null;
+    if (isAppropriate) {
+      filteredWants[wantAddress as keyof typeof wantsData] = want;
+    }
   }));
 
-  const appropriateWants = filteredWants.filter((want): want is NonNullable<typeof want> => want !== null);
+  // If there are no appropriate wants, return the current wants
+  if (Object.keys(filteredWants).length === 0) {
+    res.status(200).json({
+      wants: {
+        [baseSepolia.id]: {
+          salt: Number(salt) + numWants,
+        }
+      }
+    });
+    return;
+  }
 
   // 4. Update Wants in DB
-  const wantsToUpdate = Object.fromEntries(
-    appropriateWants.map((want, index) => [
-      wants[index], // Use the contract address as the key
-      {
-        title: want.title,
-        wish: want.wish,
-        successCriteria: want.successCriteria,
-        oracle: want.oracle,
-        feeAddress: want.feeAddress,
-        collectFee: want.collectFee,
-        expiryTimestamp: Number(want.expiryTimestamp),
-        status: want.status,
-        recipients: want.recipients,
-        categories: want.categories,
-        supportedTokens: want.supportedTokens,
-      }
-    ])
-  );
-
   try {
-    const transactions = tx.wants[baseSepolia.id].merge({
+    console.log("asdfasdf", {
+      [baseSepolia.id]: {
       salt: Number(salt) + numWants,
-      ...wantsToUpdate,
+      ...filteredWants,
+      }
+    })
+    const transactions = tx.wantit["00000000-0000-0000-0000-000000000000"].update({
+      [baseSepolia.id]: {
+      salt: Number(salt) + numWants,
+      ...filteredWants,
+      }
     });
     await db.transact(transactions);
 
@@ -205,8 +207,10 @@ export default async function handler(
 
   res.status(200).json({
       wants: {
+        [baseSepolia.id]: {
           salt: Number(salt) + numWants,
-        ...wantsToUpdate,
+        ...filteredWants,
+        }
     }
   });
 }
