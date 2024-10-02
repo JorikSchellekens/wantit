@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { useAccount, useWriteContract } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { toast } from 'react-toastify'
 import { WANT_FACTORY_ADDRESS, WANT_FACTORY_ABI } from '@/constants/contractInfo'
@@ -80,7 +80,13 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
     setInitialSupportedTokens(newTokens)
   }
 
-  const { writeContract, isSuccess, error } = useWriteContract()
+  const { writeContract, data: hash, error, isPending } = useWriteContract()
+  
+  const { 
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: errorReceipt
+  } = useWaitForTransactionReceipt({ hash })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,7 +108,7 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
     }
 
     try {
-      await writeContract({
+      writeContract({
         address: WANT_FACTORY_ADDRESS,
         abi: WANT_FACTORY_ABI,
         functionName: 'createWant',
@@ -127,17 +133,39 @@ const CreateWantModal: React.FC<CreateWantModalProps> = ({ onClose }) => {
   }
 
   useEffect(() => {
-    if (isSuccess) {
-      toast.success('Want created successfully!')
-      onClose()
+    if (hash) {
+      toast.success('Want creation transaction sent successfully!')
     }
-  }, [isSuccess, onClose])
+  }, [hash])
 
   useEffect(() => {
-    if (error) {
-      toast.error(`Error: ${error.message}`)
+    if (isConfirmed) {
+      console.log('Transaction confirmed, updating wants...')
+      toast.success('Want created and confirmed successfully!')
+      fetch('/api/updateWants')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(() => {
+          console.log('Wants updated successfully')
+        })
+        .catch((error: Error) => {
+          console.error('Error updating wants:', error.message)
+        })
+        .finally(() => {
+          onClose()
+        })
     }
-  }, [error])
+  }, [isConfirmed, onClose])
+
+  useEffect(() => {
+    if (error || errorReceipt) {
+      toast.error(`Transaction failed: ${error?.message || errorReceipt?.message}`)
+    }
+  }, [error, errorReceipt])
 
   const modalRef = useRef<HTMLDivElement>(null)
 
